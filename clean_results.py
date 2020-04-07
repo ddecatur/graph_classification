@@ -1,6 +1,12 @@
 import glob
 import os
 
+# remove csv file
+try:
+    os.remove("./classification_results/classification_info.csv")
+except:
+    print("Error while deleting classification_info.csv. Likely the file does not exist")
+
 # remove generated graphs
 fileList = glob.glob("./classification_results/learning_data_*.png")
 for filePath in fileList:

@@ -20,4 +20,3 @@ for i in range(0,n): # run the classiciation model n times for the given color s
     create_data(int(args.gNum), args.train, args.val, args.v, cwd)
     graph_classification(cwd, i)
     clean(cwd)
-    print("cool")
