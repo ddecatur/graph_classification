@@ -90,7 +90,7 @@ def create_graph (multi, n, train_val, verbose=0):
 
 
 
-# 
+# create the training data
 def create_data(size, train, val, v, directory):
     cwd=os.getcwd()
     if(cwd!=directory):

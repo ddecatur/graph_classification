@@ -9,6 +9,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import csv
 
 
 def graph_classification (path_to_data, n):
@@ -143,6 +144,16 @@ def graph_classification (path_to_data, n):
 
         # Generate Summary File
         # ------------------
+        results = list()
+        graphNum = "Graph_" + str(n)
+        # create a file with the graphnames and correlations
+        results.append(("Graph Number", "Epoch", "Train_Acc", "Val_Acc", "Train_loss"))
+        for i in epochs_range:
+            results.append((graphNum, i+1, acc[i], val_acc[i], loss[i], val_loss[i]))
 
+        with open('classification_results/classification_info.csv', 'w') as f:
+            writer = csv.writer(f, delimiter=',')
+            writer.writerows(results)
+        f.close()
 
         # ------------------
