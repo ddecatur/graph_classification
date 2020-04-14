@@ -1,8 +1,9 @@
 # import libraries
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.random import randn
+from numpy.random import randint
 from numpy.random import random
+from numpy.random import randn
 from numpy.random import choice
 from numpy.random import seed
 from numpy import cov
@@ -13,7 +14,7 @@ import math
 import os
 import csv
 
-def create_graph (multi, n, train_val, verbose=0):
+def create_scatter_graph (n, train_val, multi, verbose=0): 
 
     # seed random number generator -- uncomment line below to turn seeding on
     # seed(n)
@@ -61,7 +62,7 @@ def create_graph (multi, n, train_val, verbose=0):
     fig, ax = plt.subplots()
     ax.scatter(X1, X2, color=col)
 
-    
+
 
     if corr >= 0.4:
         s = "positive"
@@ -74,7 +75,7 @@ def create_graph (multi, n, train_val, verbose=0):
         simpcorr = 0
 
     # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + s + "/" + "graph" + str(n) + ".png"
+    fname = "graphs_filtered/" + train_val + "/" + s + "/" + "scatter_graph" + str(n) + ".png"
 
     # create ordered pair
     ret = ("graph" + str(n), corr, simpcorr) #(fname, correlation, rounded correlation)
@@ -89,9 +90,57 @@ def create_graph (multi, n, train_val, verbose=0):
     return ret
 
 
+# line graph generator
+def create_line_graph (n, train_val, multi, lineType, verbose=0):
+
+    # determine variables
+    # slope and intercept
+    sign = [-1,1]
+    m = choice(sign) * random() # determine slope
+    b = choice(sign) * randint(0,5) * random() # determine intercept
+    
+    # colors
+    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
+    if multi:
+        col = choice(colors)
+    else:
+        col = 'b'
+
+    # lineStyles
+    lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
+    if lineType:
+        lineStyle = choice(lineStyles)
+    else:
+        lineStyle = 'solid'
+    
+    # determine correlation
+    if m >= 0.4:
+        correlation = 'positive'
+    elif m <= -0.4:
+        correlation = 'negative'
+    else:
+        correlation = 'neutral'
+
+
+    # name the given graph
+    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "line_graph" + str(n) + ".png"
+
+    # plot
+    fig, ax = plt.subplots()
+    x = np.linspace(start = 0, stop = 10)
+    ax.plot(x, (m*x)+b, linestyle=lineStyle, color=col)
+    ax.set_xlim([0, 10])
+    ax.set_ylim([-10, 10])
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title(correlation + " Correlation")
+    plt.show
+    fig.savefig(fname)
+    return ("line_graph" + str(n), float(m), correlation)
+
 
 # create the training data
-def create_data(size, train, val, v, directory):
+def create_data(size, train, val, graphType, lineType, v, directory):
     cwd=os.getcwd()
     if(cwd!=directory):
         print("error: create_data called from wrong directory")
@@ -129,9 +178,16 @@ def create_data(size, train, val, v, directory):
 
         # create a file with the graphnames and correlations
         graphs.append(("Title", "Correlation", "Rounded Correlation"))
-        for i in range (0, size):
-            graphs.append(create_graph(train, i+1, "train", v))
-            graphs.append(create_graph(val, i+1, "validation", v))
+        if graphType == "scatter":
+            for i in range (0, size):
+                graphs.append(create_scatter_graph(i+1, "train", train, v))
+                graphs.append(create_scatter_graph(i+1, "validation", val, v))
+        elif graphType == "line":
+            for i in range (0, size):
+                graphs.append(create_line_graph(i+1, "train", train, lineType, v))
+                graphs.append(create_line_graph(i+1, "validation", val, lineType, v))
+        else:
+            print("error: create_data called with wrong graphType")
 
         with open('graph_info.csv', 'w') as f:
             writer = csv.writer(f, delimiter=',')

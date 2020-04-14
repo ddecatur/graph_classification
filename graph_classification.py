@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import csv
-
+from datetime import datetime
 
 def graph_classification (path_to_data, n):
     cwd=os.getcwd()
@@ -138,7 +138,11 @@ def graph_classification (path_to_data, n):
         except OSError:
             print ("Warning: Creation of the directory %s failed, might already exist" % dirPath)
         
-        fname="classification_results/learning_data_" + str(n) + ".png"
+        # find time and date for naming purposes
+        now = datetime.now() # current date and time
+        date_time = now.strftime("%m:%d:%Y_%H:%M:%S")
+
+        fname="classification_results/learning_data_" + date_time + ".png"
         plt.savefig(fname)
         # ------------------
 
