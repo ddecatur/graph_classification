@@ -1,0 +1,6 @@
+size: 10
+graphType: 'random,random'
+color: 'multi,multi'
+dataStyle: 'multi,multi'
+verbose: False
+learnNum: 1
