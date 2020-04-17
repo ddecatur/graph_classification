@@ -89,15 +89,41 @@ def create_scatter_graph (n, train_val, multi, verbose=0):
     fig.savefig(fname)
     return ret
 
+# create perturbed data
+def genData(dataType):
+    # determine variables
+    if dataType == 'line':
+        # slope and intercept
+        sign = [-1,1]
+        m = choice(sign) * random() # determine slope
+        b = choice(sign) * randint(0,25) * random() # determine intercept
+        delta = np.random.uniform(-50,50, size=(100,))
+        X1 = np.arange(100)
+        X2 = (m * X1) + b + delta
+    elif dataType == 'bar':
+        # slope and intercept
+        sign = [-1,1]
+        m = choice(sign) * random() # determine slope
+        #b = choice(sign) * randint(0,50) * random() # determine intercept
+        delta = np.random.uniform(-15,15, size=(50,))
+        X1 = np.arange(50)
+        X2 = (m * X1) + delta
+        
+        # adjust intercept to make bar graph not cross y axis
+        minVal = min(X2)
+        #print(minVal)
+        b = 0 - minVal
+        X2 = (m * X1) + b + delta
+    
+    # calculate correlation
+    corr = corr, _ = spearmanr(X1, X2) # spearman correlation
+    return (X1,X2,corr)
 
 # line graph generator
 def create_line_graph (n, train_val, multi, lineType, verbose=0):
 
-    # determine variables
-    # slope and intercept
-    sign = [-1,1]
-    m = choice(sign) * random() # determine slope
-    b = choice(sign) * randint(0,5) * random() # determine intercept
+    #determine variables
+    (X1, X2, corr) = genData('line')
     
     # colors
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
@@ -114,9 +140,9 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
         lineStyle = 'solid'
     
     # determine correlation
-    if m >= 0.4:
+    if corr >= 0.4:
         correlation = 'positive'
-    elif m <= -0.4:
+    elif corr <= -0.4:
         correlation = 'negative'
     else:
         correlation = 'neutral'
@@ -127,20 +153,59 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
 
     # plot
     fig, ax = plt.subplots()
-    x = np.linspace(start = 0, stop = 10)
-    ax.plot(x, (m*x)+b, linestyle=lineStyle, color=col)
-    ax.set_xlim([0, 10])
-    ax.set_ylim([-10, 10])
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.plot(X1,X2, color = col, linestyle=lineStyle)
+    plt.xlabel('X1')
+    plt.ylabel('X2')
     plt.title(correlation + " Correlation")
     plt.show
     fig.savefig(fname)
-    return ("line_graph" + str(n), float(m), correlation)
+    return ("line_graph" + str(n), float(corr), correlation)
+
+# Bar graph generator
+def create_bar_graph (n, train_val, multi, barType, verbose=0):
+
+    # determine variables
+    (X1,X2,corr) = genData('bar')
+    
+    # colors
+    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
+    if multi:
+        col = choice(colors)
+    else:
+        col = 'b'
+
+    # lineStyles
+    barStyles = ['solid', 'dotted', 'dashed', 'dashdot']
+    if barType:
+        barStyle = choice(barStyles)
+    else:
+        barStyle = 'solid'
+    
+    # determine correlation
+    if corr >= 0.5:
+        correlation = 'positive'
+    elif corr <= -0.5:
+        correlation = 'negative'
+    else:
+        correlation = 'neutral'
+
+
+    # name the given graph
+    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "bar_graph" + str(n) + ".png"
+
+    # plot
+    fig, ax = plt.subplots()
+    plt.bar(X1,X2, color = col, linestyle=barStyle)
+    plt.xlabel('X1')
+    plt.ylabel('X2')
+    plt.title(correlation + " Correlation")
+    plt.show
+    fig.savefig(fname)
+    return ("bar_graph" + str(n), float(corr), correlation)
 
 
 # create the training data
-def create_data(size, train, val, graphType, lineType, v, directory):
+def create_training_data(size, graphType, color, dataStyle, v, directory):
     cwd=os.getcwd()
     if(cwd!=directory):
         print("error: create_data called from wrong directory")
@@ -176,19 +241,47 @@ def create_data(size, train, val, graphType, lineType, v, directory):
         # initialize the list (array)
         graphs = list()
 
-        # create a file with the graphnames and correlations
-        graphs.append(("Title", "Correlation", "Rounded Correlation"))
-        if graphType == "scatter":
-            for i in range (0, size):
-                graphs.append(create_scatter_graph(i+1, "train", train, v))
-                graphs.append(create_scatter_graph(i+1, "validation", val, v))
-        elif graphType == "line":
-            for i in range (0, size):
-                graphs.append(create_line_graph(i+1, "train", train, lineType, v))
-                graphs.append(create_line_graph(i+1, "validation", val, lineType, v))
-        else:
-            print("error: create_data called with wrong graphType")
+        # match tuples
+        (train_gt, val_gt) = graphType
+        (train_col, val_col) = color
+        (train_ds, val_ds) = dataStyle
+        #test = [train_gt, val_gt, train_col, val_col, train_ds, val_ds]
+        dt = ['scatter','line','bar'] # list of possible data types
+        errorMsg = False
 
+        # Training Data
+        orig_gt = train_gt
+        graphs.append(("Title", "Correlation", "Rounded Correlation"))
+        for i in range (0,size):
+            if orig_gt == "random":
+                train_gt = choice(dt)
+            if train_gt == "scatter":
+                graphs.append(create_scatter_graph(i+1, "train", train_col, v))
+            elif train_gt == "line":
+                graphs.append(create_line_graph(i+1, "train", train_col, train_ds, v))
+            elif train_gt == "bar":
+                graphs.append(create_bar_graph(i+1, "train", train_col, train_ds, v))
+            else:
+                errorMsg = True
+        
+        # Validation Data
+        orig_gt = val_gt
+        for i in range (0, size):
+            # choose graph type if random
+            if orig_gt == "random":
+                val_gt = choice(dt)
+            if val_gt == "scatter":
+                graphs.append(create_scatter_graph(i+1, "validation", val_col, v))
+            elif val_gt == "line":
+                graphs.append(create_line_graph(i+1, "validation", val_col, val_ds, v))
+            elif val_gt == "bar":
+                graphs.append(create_bar_graph(i+1, "validation", val_col, val_ds, v))
+            else:
+                errorMsg = True
+        if errorMsg == True:
+            print("error: create_data called with wrong graphType (validation)")    
+    
+        # create CSV file with graph names and correlations
         with open('graph_info.csv', 'w') as f:
             writer = csv.writer(f, delimiter=',')
             writer.writerows(graphs)
