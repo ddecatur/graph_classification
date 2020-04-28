@@ -71,3 +71,16 @@ def clean(directory):
             print ("Deletion of the directory %s failed" % path)
 
         print("clean: successful")
+
+def cleanReg(directory):
+    cwd=os.getcwd()
+    if(cwd!=directory):
+        print("error: cleanReg called from wrong directory, could cause problems with deletions")
+    else:
+        # remove generated graphs
+        fileList = glob.glob("./graphs_filtered/*/*/reg_*graph*.png")
+        for filePath in fileList:
+            try:
+                os.remove(filePath)
+            except:
+                print("Error while deleting file : ", filePath)

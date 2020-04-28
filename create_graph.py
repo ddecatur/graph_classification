@@ -55,7 +55,7 @@ def create_scatter_graph (n, train_val, multi, verbose=0):
 
     # plot
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi:
+    if multi == 'multi':
         col = choice(colors)
     else:
         col = 'b'
@@ -75,7 +75,7 @@ def create_scatter_graph (n, train_val, multi, verbose=0):
         simpcorr = 0
 
     # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + s + "/" + "scatter_graph" + str(n) + ".png"
+    fname = "graphs_filtered/" + train_val + "/" + s + "/" + "reg_scatter_graph" + str(n) + ".png"
 
     # create ordered pair
     ret = ("graph" + str(n), corr, simpcorr) #(fname, correlation, rounded correlation)
@@ -127,7 +127,7 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
     
     # colors
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi:
+    if multi == 'multi':
         col = choice(colors)
     else:
         col = 'b'
@@ -149,7 +149,7 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
 
 
     # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "line_graph" + str(n) + ".png"
+    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "reg_line_graph" + str(n) + ".png"
 
     # plot
     fig, ax = plt.subplots()
@@ -157,7 +157,7 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
     plt.xlabel('X1')
     plt.ylabel('X2')
     plt.title(correlation + " Correlation")
-    plt.show
+    #plt.show
     fig.savefig(fname)
     return ("line_graph" + str(n), float(corr), correlation)
 
@@ -169,7 +169,7 @@ def create_bar_graph (n, train_val, multi, barType, verbose=0):
     
     # colors
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi:
+    if multi == 'multi':
         col = choice(colors)
     else:
         col = 'b'
@@ -191,7 +191,7 @@ def create_bar_graph (n, train_val, multi, barType, verbose=0):
 
 
     # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "bar_graph" + str(n) + ".png"
+    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "reg_bar_graph" + str(n) + ".png"
 
     # plot
     fig, ax = plt.subplots()
@@ -199,10 +199,64 @@ def create_bar_graph (n, train_val, multi, barType, verbose=0):
     plt.xlabel('X1')
     plt.ylabel('X2')
     plt.title(correlation + " Correlation")
-    plt.show
+    #plt.show
     fig.savefig(fname)
     return ("bar_graph" + str(n), float(corr), correlation)
 
+
+# create multi data graph
+def create_multiData(n, train_val, multi, lineType, verbose=0):
+    #determine variables
+    (X1, X2, corr1) = genData('line')
+    (Y1, Y2, corr2) = genData('line')
+
+    # colors
+    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
+    
+    col1 = 'b'#choice(colors) -- for now make it blue for simplicity
+    col2 = 'r'#choice(colors)
+    #while col2 == col2: # prevent the two colors from being the same
+    #    col2 = choice(colors)
+
+
+    # lineStyles
+    lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
+    if lineType:
+        lineStyle = choice(lineStyles)
+    else:
+        lineStyle = 'solid'
+    
+    # determine correlations
+    if corr1 >= 0.4:
+        correlation1 = 'positive'
+    elif corr1 <= -0.4:
+        correlation1 = 'negative'
+    else:
+        correlation1 = 'neutral'
+    if corr2 >= 0.4:
+        correlation2 = 'positive'
+    elif corr2 <= -0.4:
+        correlation2 = 'negative'
+    else:
+        correlation2 = 'neutral'
+
+
+    # name the given graph
+    fname = "graphs_filtered/testttttt.png"# + train_val + "/" + correlation1 + "/" + "reg_line_graph" + str(n) + ".png"
+
+    # plot
+    fig, ax = plt.subplots()
+    plt.plot(X1,X2, color = col1, linestyle=lineStyle)
+    plt.plot(Y1,Y2, color = col2, linestyle=lineStyle)
+    plt.xlabel('X1,Y1')
+    plt.ylabel('X2,Y2')
+    plt.title(correlation1 + " Correlation")
+    #plt.show
+    fig.savefig(fname)
+    return ("line_graph" + str(n), float(corr1), correlation1)
+
+def test_multiData():
+    create_multiData(10,'train','multi',False)
 
 # create the training data
 def create_training_data(size, graphType, color, dataStyle, v, directory):

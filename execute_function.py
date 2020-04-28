@@ -4,6 +4,7 @@ from create_graph import *
 from graph_classification import *
 from clean import *
 from process_instF import *
+from seg_img import *
 import sys
 import csv
 import argparse
@@ -30,5 +31,7 @@ elif(args.function == "graph_classification"):
     graph_classification(cwd,1)
 elif(args.function == "clean"):
     clean(cwd)
+elif(args.function == "seg_img"):
+    saveGraphs()
 else:
     print("error: invalid function specified")

@@ -1,7 +1,8 @@
 from create_graph import *
 from graph_classification import graph_classification
-from clean import clean
+from clean import *
 from process_instF import *
+from seg_img import *
 import OpenSSL
 import argparse
 
@@ -16,9 +17,13 @@ with open(args.instF) as f:
     instr = yaml.load(f, Loader=yaml.FullLoader)
 
 n = instr.get('learnNum')
+seg = instr.get('seg')
 
 i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
     executeOrder66(args.instF,cwd) # create the training data from the instructions file
+    if seg:
+        saveGraphs()
+        cleanReg(cwd)
     graph_classification(cwd, i)
     clean(cwd)
