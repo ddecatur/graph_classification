@@ -134,7 +134,7 @@ def create_line_graph (n, train_val, multi, lineType, verbose=0):
 
     # lineStyles
     lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    if lineType:
+    if lineType == 'multi':
         lineStyle = choice(lineStyles)
     else:
         lineStyle = 'solid'
@@ -176,7 +176,7 @@ def create_bar_graph (n, train_val, multi, barType, verbose=0):
 
     # lineStyles
     barStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    if barType:
+    if barType == 'multi':
         barStyle = choice(barStyles)
     else:
         barStyle = 'solid'
@@ -205,23 +205,30 @@ def create_bar_graph (n, train_val, multi, barType, verbose=0):
 
 
 # create multi data graph
-def create_multiData(n, train_val, multi, lineType, verbose=0):
+def create_multiData(n, sN, train_val, lineType, model, verbose=0):
     #determine variables
-    (X1, X2, corr1) = genData('line')
-    (Y1, Y2, corr2) = genData('line')
+    
+    varArr = np.empty (sN, tuple)
+    for i in range (0,sN):
+        varArr[i] = genData('line')
+        
+    (X1, X2, corr1) = varArr[0]
+    # (Y1, Y2, corr2) = genData('line')
 
     # colors
-    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    
-    col1 = 'b'#choice(colors) -- for now make it blue for simplicity
-    col2 = 'r'#choice(colors)
+    colors = np.array(['r', 'g', 'b']) # add other colors to see if it affects learning
+    colArr = np.empty(sN, str)
+    for i in range (0, sN):
+        colArr[i] = colors[i]
+    # col1 = 'b'#choice(colors) -- for now make it blue for simplicity
+    # col2 = 'r'#choice(colors)
     #while col2 == col2: # prevent the two colors from being the same
     #    col2 = choice(colors)
 
 
     # lineStyles
     lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    if lineType:
+    if lineType == 'multi':
         lineStyle = choice(lineStyles)
     else:
         lineStyle = 'solid'
@@ -233,30 +240,27 @@ def create_multiData(n, train_val, multi, lineType, verbose=0):
         correlation1 = 'negative'
     else:
         correlation1 = 'neutral'
-    if corr2 >= 0.4:
-        correlation2 = 'positive'
-    elif corr2 <= -0.4:
-        correlation2 = 'negative'
-    else:
-        correlation2 = 'neutral'
-
 
     # name the given graph
-    fname = "graphs_filtered/testttttt.png"# + train_val + "/" + correlation1 + "/" + "reg_line_graph" + str(n) + ".png"
+    if model == 'g':
+        fname = "graphs_filtered/" + train_val + "/" + correlation1 + "/" + "reg_line_graph" + str(n) + ".png"
+    else:
+        fname = "series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
 
     # plot
     fig, ax = plt.subplots()
-    plt.plot(X1,X2, color = col1, linestyle=lineStyle)
-    plt.plot(Y1,Y2, color = col2, linestyle=lineStyle)
-    plt.xlabel('X1,Y1')
-    plt.ylabel('X2,Y2')
-    plt.title(correlation1 + " Correlation")
+    for i,var in enumerate(varArr):
+        (X1,X2,corr) = var
+        plt.plot(X1, X2, color=colArr[i], linestyle=lineStyle)
+    
+    # plt.plot(X1,X2, color = col1, linestyle=lineStyle)
+    # plt.plot(Y1,Y2, color = col2, linestyle=lineStyle)
+    plt.xlabel('X1')
+    plt.ylabel('X2')
+    plt.title(str(sN) + " Series")
     #plt.show
     fig.savefig(fname)
     return ("line_graph" + str(n), float(corr1), correlation1)
-
-def test_multiData():
-    create_multiData(10,'train','multi',False)
 
 # create the training data
 def create_training_data(size, graphType, color, dataStyle, v, directory):
@@ -346,3 +350,39 @@ def create_training_data(size, graphType, color, dataStyle, v, directory):
 
         # return the current path (this will be used for the image classication program)
         return os.getcwd()
+
+def train_series_class(size, sN, dataStyle, directory):
+    cwd=os.getcwd()
+    if(cwd!=directory):
+        print("error: create_data called from wrong directory")
+    else:
+        # ----------------------------------------
+        path = "./series_filtered"
+        try:
+            os.mkdir(path)
+        except OSError:
+            print ("Warning: Creation of the directory %s failed, might already exist" % path)
+
+        # create training and validation directories
+        sNop = ["1", "2", "3"]
+        for n in sNop:
+            train_path = "./series_filtered/train/" + n
+            try:
+                os.makedirs(train_path)
+            except OSError:
+                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
+            train_path = "./series_filtered/validation/" + n
+            try:
+                os.makedirs(train_path)
+            except OSError:
+                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
+
+        # ----------------------------------------
+
+        for i in range (0, size):
+            sNopC = int(choice(sNop))
+            create_multiData(i, sNopC, 'train', dataStyle, 's')
+            create_multiData(i, sNopC, 'validation', dataStyle, 's')
+
+
+#test_multiData()

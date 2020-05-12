@@ -33,5 +33,7 @@ elif(args.function == "clean"):
     clean(cwd)
 elif(args.function == "seg_img"):
     saveGraphs()
+elif(args.function == "cleanSeries"):
+    cleanSeries(cwd)
 else:
     print("error: invalid function specified")

@@ -1,5 +1,6 @@
 from create_graph import *
 from graph_classification import graph_classification
+from series_classification import series_classification
 from clean import *
 from process_instF import *
 from seg_img import *
@@ -18,6 +19,7 @@ with open(args.instF) as f:
 
 n = instr.get('learnNum')
 seg = instr.get('seg')
+sN = instr.get('seriesNum')
 
 i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
@@ -25,5 +27,9 @@ for i in range(0,n): # run the classiciation model n times for the given color s
     if seg:
         saveGraphs()
         cleanReg(cwd)
-    graph_classification(cwd, i)
-    clean(cwd)
+    if sN == 'multi':
+        series_classification(cwd, i)
+        cleanSeries(cwd)
+    else:
+        graph_classification(cwd, i)
+        clean(cwd)
