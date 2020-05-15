@@ -5,6 +5,8 @@ import colorsys
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
+from predict import predictCategory
 
 
 # clustering code adapted from https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
@@ -37,24 +39,27 @@ def calculate_WSS(points, kmax): # aka the elbow method -- code adapted from #ht
 
 # determine appropriate k
 def find_k(x):
-    print("test2")
-    kmax = 4
-    #for k in range(2, kmax+1):
-    #    kmeans = KMeans(n_clusters = k).fit(x)
-    #    labels = kmeans.labels_
-    #    sil.append(silhouette_score(x, labels, metric = 'euclidean')) 
-    sse = calculate_WSS(x, kmax)
-    sseMax = 0
-    print("test3")
-    for i in range(2,kmax+1):
-        if sse[i-2] > sseMax:
-            silMax = sse[i-2]
-            idealK = i
-    return idealK
+  pred = predictCategory(x)
+  return pred+2
+  
+    # print("test2")
+    # kmax = 4
+    # #for k in range(2, kmax+1):
+    # #    kmeans = KMeans(n_clusters = k).fit(x)
+    # #    labels = kmeans.labels_
+    # #    sil.append(silhouette_score(x, labels, metric = 'euclidean')) 
+    # sse = calculate_WSS(x, kmax)
+    # sseMax = 0
+    # print("test3")
+    # for i in range(2,kmax+1):
+    #     if sse[i-2] > sseMax:
+    #         silMax = sse[i-2]
+    #         idealK = i
+    # return idealK
 
 # Implement the K Means Clustering
-def KMeansCluster (imageArr):
-    k = 3#find_k(imageArr) -- hard coding this to save time for now
+def KMeansCluster (imageArr,img):
+    k = find_k(img)#find_k(imageArr) -- hard coding this to save time for now
     clt = KMeans(n_clusters = k)
     clt.fit(imageArr)
     return clt

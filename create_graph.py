@@ -216,10 +216,13 @@ def create_multiData(n, sN, train_val, lineType, model, verbose=0):
     # (Y1, Y2, corr2) = genData('line')
 
     # colors
-    colors = np.array(['r', 'g', 'b']) # add other colors to see if it affects learning
+    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
+    copyC = colors
     colArr = np.empty(sN, str)
     for i in range (0, sN):
-        colArr[i] = colors[i]
+        elem = choice(copyC)
+        colArr[i] = elem
+        copyC.remove(elem)
     # col1 = 'b'#choice(colors) -- for now make it blue for simplicity
     # col2 = 'r'#choice(colors)
     #while col2 == col2: # prevent the two colors from being the same

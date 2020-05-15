@@ -13,13 +13,14 @@ from k_means_clustering import *
 def idColor(image):#'./testttttt.png'):
     rangeList = list()
     
+    ogImg = image
     # convert image
-    #image = cv2.imread(image)
-    #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert color
+    image = cv2.imread(image)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert color
     image = image.reshape((image.shape[0] * image.shape[1], 3))
     
     
-    clt = KMeansCluster(image)
+    clt = KMeansCluster(image,ogImg)
     hist = clusterCounts(clt)
 
     # determine which colors to segment out
@@ -91,7 +92,7 @@ def segmentImg(img='./graphs_filtered/testttttt.png'):
     # read in image
     graph = cv2.imread(img)
     graph = cv2.cvtColor(graph, cv2.COLOR_BGR2RGB) # convert color from BGR to RGB
-    colRangeList = hsvRange(idColor(graph))
+    colRangeList = hsvRange(idColor(img))
 
     # color range for the mask -- (0, 0, 30), (80, 80, 255)
     #lower_blue = np.array([110,50,50])

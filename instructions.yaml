@@ -1,8 +1,8 @@
 size: 1000
 graphType: 'random,random'
 color: 'multi,multi'  # multi for multi-colored, anything else for single color
-dataStyle: 'solid,solid'  # same issue here that multi had, fix later
+dataStyle: 'multi,multi'  # same issue here that multi had, fix later
 verbose: False
 learnNum: 1
 seg: False
-seriesNum: multi
+#seriesNum: multi
