@@ -20,14 +20,15 @@ with open(args.instF) as f:
 n = instr.get('learnNum')
 seg = instr.get('seg')
 sN = instr.get('seriesNum')
+ST = instr.get('seriesTrain')
 
 i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
     executeOrder66(args.instF,cwd) # create the training data from the instructions file
-    if seg:
-        saveGraphs()
-        cleanReg(cwd)
-    if sN == 'multi':
+    # if seg:
+    #     saveGraphs()
+    #     cleanReg(cwd)
+    if ST:
         series_classification(cwd, i)
         cleanSeries(cwd)
     else:

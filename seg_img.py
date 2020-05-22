@@ -7,7 +7,12 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 import colorsys
 from k_means_clustering import *
+import math
 
+def col_dist(c1,c2):
+    (r,g,b) = c1
+    (R,G,B) = c2
+    return math.sqrt((r-R)**2 + (g-G)**2 + (b-B)**2)
 
 # type: img path --> list of color ranges
 def idColor(image):#'./testttttt.png'):
@@ -28,7 +33,7 @@ def idColor(image):#'./testttttt.png'):
     maxCol = max(hist) # identify the background color as the most common color so it can be removed
     minCol = min(hist)
     for (percent, color) in zip(hist, clt.cluster_centers_):
-        if (percent != maxCol and percent != minCol):
+        if (percent != maxCol and col_dist(color,(0,0,0))>60): # and percent != minCol):
             colList.append(color.astype("uint8").tolist())
     return colList
 
@@ -81,9 +86,10 @@ def hsvRange (rgbList):
         ll = (max(h-15,0), max(s-15,0), max(v-40,0))
         ul = (min(h+15,180), min(s+15,255), min(v+40,255))
         rangeList.append((ll,ul))
-    print(rangeList)
     return rangeList
 
+def hsv_col_str():
+    return 2
 
 def segmentImg(img='./graphs_filtered/testttttt.png'):
     '''
@@ -92,7 +98,8 @@ def segmentImg(img='./graphs_filtered/testttttt.png'):
     # read in image
     graph = cv2.imread(img)
     graph = cv2.cvtColor(graph, cv2.COLOR_BGR2RGB) # convert color from BGR to RGB
-    colRangeList = hsvRange(idColor(img))
+    colList = idColor(img)
+    colRangeList = hsvRange(colList)
 
     # color range for the mask -- (0, 0, 30), (80, 80, 255)
     #lower_blue = np.array([110,50,50])
@@ -107,9 +114,9 @@ def segmentImg(img='./graphs_filtered/testttttt.png'):
     # convert to hsv image type
     hsv_graph = cv2.cvtColor(graph, cv2.COLOR_RGB2HSV)
     results = list()
-    for (ll, ul) in colRangeList:
+    for i,(ll, ul) in enumerate(colRangeList):
         mask = cv2.inRange(hsv_graph, ll, ul)
-        results.append(cv2.bitwise_and(graph, graph, mask=mask))
+        results.append((cv2.bitwise_and(graph, graph, mask=mask), colList[i]))
 
     #maskBlue = cv2.inRange(hsv_graph, lower_blue, upper_blue)
     #maskRed = cv2.inRange(hsv_graph, lower_red, upper_red)
@@ -130,6 +137,15 @@ def segmentImg(img='./graphs_filtered/testttttt.png'):
     return results
 
 
+def det_corr(fname):
+    lst = fname.split('$')
+    length = len(lst)-1
+    col_corr = {}
+    for i in range(0,length):
+        res = lst[i].split('-')
+        col_corr[res[0]] = res[1]
+    return col_corr
+
 # Function to save the graphs
 def saveGraphs(rootDir='graphs_filtered'):
   
@@ -140,8 +156,9 @@ def saveGraphs(rootDir='graphs_filtered'):
                     for count, filename in enumerate(os.listdir(rootDir+'/'+dir_name1+'/'+dir_name2)): # options: actual image names
                         segImg = segmentImg(rootDir+'/'+dir_name1+'/'+dir_name2+'/'+filename)
                         i=0
-                        for res in segImg:
-                            fname = rootDir+'/'+dir_name1+'/'+dir_name2+'/seg_'+str(i)+'_'+filename
+                        col_corr = det_corr(filename)
+                        for (res,col) in segImg:
+                            fname = rootDir+'/'+dir_name1+'/'+ col_corr[col] +'/seg_'+str(i)+'_'+filename #dir_name2+'/seg_'+str(i)+'_'+filename
                             plt.imsave(fname, res)
                             i=i+1
 

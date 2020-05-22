@@ -1,7 +1,8 @@
 import cv2
 import tensorflow as tf
 
-CATEGORIES = [1,2,3]
+#CATEGORIES = [1,2,3]
+#CATEGORIES = ['positive', 'negative', 'neutral']
 
 def prepare(filepath):
     IMG_SIZE = 150
@@ -16,7 +17,7 @@ def predict(img, model):
     prediction = model.predict([prepare(img)])
     return prediction
 
-def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5'):
+def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5',CATEGORIES=[1,2,3]):
     prediction = predict(img, load_model(model))
     midx = 0
     mval = 0
@@ -28,5 +29,6 @@ def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5'):
         print("error: no category found")
         return -1
     else:
-        #print(CATEGORIES[midx])
+        print(CATEGORIES[midx])
         return CATEGORIES[midx]
+#predictCategory()

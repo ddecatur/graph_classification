@@ -131,6 +131,9 @@ def graph_classification (path_to_data, n):
         
         # save data
         
+        # Save the model
+        model.save('graph_class_model.h5') 
+
         # create classification_results directory
         dirPath = "./classification_results"
         try:
