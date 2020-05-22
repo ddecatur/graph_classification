@@ -19,6 +19,9 @@ def predict(img, model):
 
 def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5',CATEGORIES=[1,2,3]):
     prediction = predict(img, load_model(model))
+    # model = load_model(model)
+    # newpred = model.predict_classes([prepare(img)]) #model.predict_classes(prediction)
+    # newpred=newpred[0]
     midx = 0
     mval = 0
     for i,pred in enumerate(prediction[0]):
@@ -30,5 +33,6 @@ def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5',CATEG
         return -1
     else:
         print(CATEGORIES[midx])
-        return CATEGORIES[midx]
-#predictCategory()
+        return CATEGORIES[midx]#CATEGORIES[newpred]CATEGORIES[midx]
+#predictCategory('test3.png')
+#print(predictCategory('test3.png','graph_class_model.h5',['positive', 'negative', 'neutral']))

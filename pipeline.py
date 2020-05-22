@@ -21,13 +21,17 @@ def run(img):
     for i,(res,col) in enumerate(segImg):
         fname = "pipeline_batch/" + str(i) + ".png"
         plt.imsave(fname, res)
-        cat = predictCategory(fname, "graph_class_model.h5", ['positive', 'negative', 'neutral'])
+        cat = predictCategory(fname, "graph_class_model.h5", ['negative', 'neutral', 'positive'])
         col = find_nearest_col(col,posRGB)
         rtn[col] = cat
     return rtn
 
-
-result = run('./testttttt.png')
+results = list()
+# for i in range(0,3):
+#     results.append(run('./test' + str(i) + '.png'))
+# for result in results:
+#     print(result)
+result = run('./testneutral1.png')
 for elem in result:
     col = colorMap.get(elem)
     print("color " + col + " has a " + result.get(elem) + " correlation")

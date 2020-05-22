@@ -320,7 +320,11 @@ def create_multiData(n, sN, train_val, seriesType, dataStyle, model, verbose=0):
         
         #fname = "graphs_filtered/" + train_val + "/" + corr_list_str + "/" + "reg_line_graph" + str(n) + ".png"
     else:
-        fname = "series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
+        closeCol = colArr[0]
+        if closeCol in correlation:
+            corrstr = correlation[closeCol]
+            fname = "test"+corrstr+str(n)+".png" #"series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
+            fig.savefig(fname)
     
     
 
@@ -462,5 +466,5 @@ def train_series_class(size, sN, dataStyle, directory):
             create_multiData(i, sNopC, 'train', dataStyle, 's')
             create_multiData(i, sNopC, 'validation', 'multi', dataStyle, 's')
 
-
-#test_multiData()
+# for i in range (0,5):
+#     create_multiData(i+1,1,'train','random','multi','s')
