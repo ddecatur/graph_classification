@@ -35,12 +35,12 @@ def calculate_WSS(points, kmax): # aka the elbow method -- code adapted from #ht
 
 # determine appropriate k
 def find_k(x):
-  pred = predictCategory(x,'series_class_model_v1.h5',[1,2,3])
+  pred = predictCategory(x,'series_class_model_v2.h5',[1,2,3])
   return pred+2
 
 # Implement the K Means Clustering
 def KMeansCluster (imageArr,img):
-    k = 3#find_k(img)#find_k(imageArr) -- hard coding this to save time for now
+    k = find_k(img) # 3 # hard coding this to save time for now
     clt = KMeans(n_clusters = k)
     clt.fit(imageArr)
     return clt

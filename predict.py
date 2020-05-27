@@ -30,9 +30,11 @@ def predictCategory(img='./testttttt.png',model='series_class_model_v1.h5',CATEG
             mval = pred
     if mval == 0:
         print("error: no category found")
-        return -1
+        return "[error: no category found]"
     else:
-        print(CATEGORIES[midx])
+        #print("seriesnum: ")
+        #print(CATEGORIES[midx])
+        #print(img)
         return CATEGORIES[midx]#CATEGORIES[newpred]CATEGORIES[midx]
 #predictCategory('test3.png')
 #print(predictCategory('test3.png','graph_class_model.h5',['positive', 'negative', 'neutral']))
