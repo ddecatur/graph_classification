@@ -321,7 +321,7 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
                 plt.imsave(fname,img)
             else:
                 print('closest color not found')
-        
+        plt.close('all')
         #fname = "graphs_filtered/" + train_val + "/" + corr_list_str + "/" + "reg_line_graph" + str(n) + ".png"
     else:
         # closeCol = colArr[0]
@@ -331,6 +331,7 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
         #     fig.savefig(fname)
         fname = "series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
         fig.savefig(fname)
+        plt.close()
     
     
 
