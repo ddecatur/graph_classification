@@ -233,7 +233,7 @@ def find_nearest_col(color, dic):
     
 
 # create multi data graph
-def create_multiData(n, sN, train_val, seriesType, dataStyle, model, verbose=0):
+def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, verbose=0):
     
     #determine variables
     STcopy = seriesType
@@ -254,6 +254,10 @@ def create_multiData(n, sN, train_val, seriesType, dataStyle, model, verbose=0):
     # colors
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
     posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
+    if dcolor == 'multi2':
+        colors = ['y', 'c', 'm']
+        posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}
+    
     copyC = colors
     colArr = np.empty(sN, str)
     for i in range (0, sN):
@@ -381,10 +385,10 @@ def create_training_data(size, seriesNum, graphType, color, dataStyle, v, direct
             sNop = ["1", "2", "3"]
             for i in range (0,size):
                 sNopC = int(choice(sNop))
-                create_multiData(i+1, sNopC, "train", train_gt, train_ds, 'g', v)
+                create_multiData(i+1, sNopC, "train", train_gt, train_col, train_ds, 'g', v)
             for i in range (0,size):
                 sNopC = int(choice(sNop))
-                create_multiData(i+1, sNopC, "validation", train_gt, train_ds, 'g', v)
+                create_multiData(i+1, sNopC, "validation", train_gt, val_col, train_ds, 'g', v)
 
         else:
             #test = [train_gt, val_gt, train_col, val_col, train_ds, val_ds]
@@ -465,8 +469,8 @@ def train_series_class(size, sN, dataStyle, directory):
 
         for i in range (0, size):
             sNopC = int(choice(sNop))
-            create_multiData(i, sNopC, 'train', 'random', dataStyle, 's')
-            create_multiData(i, sNopC, 'validation', 'random', dataStyle, 's')
+            create_multiData(i, sNopC, 'train', 'random', 'multi', dataStyle, 's')
+            create_multiData(i, sNopC, 'validation', 'random', 'multi', dataStyle, 's')
 
 # for i in range (0,5):
 #     create_multiData(i+1,1,'train','random','multi','s')
