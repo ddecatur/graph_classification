@@ -46,7 +46,7 @@ def idColor(image):#'./testttttt.png'):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert color
     image = image.reshape((image.shape[0] * image.shape[1], 3))
     
-    
+
     clt = KMeansCluster(image,ogImg)
     hist = clusterCounts(clt)
     posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b', (0,0,0):'black', (255,255,255):'white'}
@@ -123,8 +123,8 @@ def find_ranges(h,s,v):
         lh.append(0)
         uh.append(uspill)
     sl = max(s-10,0)
-    vl = max(v-10,0)
-    su = min(s+40,255)
+    vl = max(v-40,0) # should be -40
+    su = min(s+10,255) # should be +10
     vu = min(v+40,255)
     for i,bound in enumerate(lh):
         rtn.add(((bound, sl, vl), (uh[i], su, vu)))
