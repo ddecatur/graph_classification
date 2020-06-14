@@ -6,6 +6,7 @@ from process_instF import *
 from seg_img import *
 import OpenSSL
 import argparse
+import datetime
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Parse Command Line Arguments')
@@ -24,6 +25,7 @@ ST = instr.get('seriesTrain')
 
 i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
+    start = datetime.datetime.now()
     executeOrder66(args.instF,cwd) # create the training data from the instructions file
     # if seg:
     #     saveGraphs()
@@ -34,3 +36,4 @@ for i in range(0,n): # run the classiciation model n times for the given color s
     else:
         graph_classification(cwd, i)
         clean(cwd)
+    print('generation and classification ' + str(i) + ' elapsed time: ', (datetime.datetime.now()-start).total_seconds())
