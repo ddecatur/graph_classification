@@ -122,9 +122,9 @@ def find_ranges(h,s,v):
     if uspill > 0:
         lh.append(0)
         uh.append(uspill)
-    sl = max(s-10,0)
+    sl = max(s-25,0)
     vl = max(v-40,0) # should be -40
-    su = min(s+10,255) # should be +10
+    su = min(s+25,255) # should be +10
     vu = min(v+40,255)
     for i,bound in enumerate(lh):
         rtn.add(((bound, sl, vl), (uh[i], su, vu)))
