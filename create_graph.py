@@ -255,8 +255,8 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
     posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
     if dcolor == 'multi2':
-        colors = ['y', 'c', 'm']
-        posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}
+        colors = ['y', 'c', 'm']#colors = ['y', 'c', 'm', 'r', 'g', 'b']
+        posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}#posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y', (255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
     
     copyC = colors
     colArr = np.empty(sN, str)
@@ -321,6 +321,7 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
                 plt.imsave(fname,img)
             else:
                 print('closest color not found')
+                print(col)
         plt.close('all')
         #fname = "graphs_filtered/" + train_val + "/" + corr_list_str + "/" + "reg_line_graph" + str(n) + ".png"
     else:
