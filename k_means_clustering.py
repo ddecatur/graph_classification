@@ -35,7 +35,7 @@ def calculate_WSS(points, kmax): # aka the elbow method -- code adapted from #ht
 
 # determine appropriate k
 def find_k(x):
-  pred = predictCategory(x,'series_class_model_v2.h5',[1,2,3])
+  pred = predictCategory(x,'series_class_model_v3.h5',[1,2,3]) #'series_class_model_mDS_DC_93acc.h5' 'series_class_model_v2.h5'
   return pred+2
 
 # Implement the K Means Clustering

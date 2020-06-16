@@ -390,7 +390,7 @@ def create_training_data(size, seriesNum, graphType, color, dataStyle, v, direct
                 create_multiData(i+1, sNopC, "train", train_gt, train_col, train_ds, 'g', v)
             for i in range (0,size):
                 sNopC = int(choice(sNop))
-                create_multiData(i+1, sNopC, "validation", train_gt, val_col, train_ds, 'g', v)
+                create_multiData(i+1, sNopC, "validation", val_gt, val_col, val_ds, 'g', v)
 
         else:
             #test = [train_gt, val_gt, train_col, val_col, train_ds, val_ds]
