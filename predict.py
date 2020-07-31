@@ -17,7 +17,7 @@ def predict(img, model):
     prediction = model.predict([prepare(img)])
     return prediction
 
-def predictCategory(img='./testttttt.png',model='series_class_model_v2.h5',CATEGORIES=[1,2,3]):
+def predictCategory(img='./testttttt.png',model='models/series/series_class_model_v2.h5',CATEGORIES=[1,2,3]):
     prediction = predict(img, load_model(model))
     # model = load_model(model)
     # newpred = model.predict_classes([prepare(img)]) #model.predict_classes(prediction)

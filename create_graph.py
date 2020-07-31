@@ -283,17 +283,18 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
         ((X1,X2,corrph),GT) = var
         corr.append(corrph)
         if GT == 'line':
-            plt.plot(X1, X2, color=colArr[i], linestyle=LSarr[i])
+            plt.plot(X1, X2, color=colArr[i], linestyle=LSarr[i], label=('series' + str(i)))
         elif GT == 'scatter':
-            ax.scatter(X1, X2, color=colArr[i])
+            ax.scatter(X1, X2, color=colArr[i], label=('series' + str(i)))
         elif GT == 'bar':
-            plt.bar(X1,X2, color=colArr[i])
+            plt.bar(X1,X2, color=colArr[i], label=('series' + str(i)))
         else:
             raise ValueError('graph type not recognized')
 
 
     plt.xlabel('X1')
     plt.ylabel('X2')
+    ax.legend()
     plt.title(str(sN) + " Series")
     
     

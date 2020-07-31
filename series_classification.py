@@ -118,7 +118,7 @@ def series_classification (path_to_data, n):
         # save data
         
         # Save the model
-        model.save('series_class_model.h5') 
+        model.save('models/series/series_class_model.h5')
 
         # create classification_results directory
         dirPath = "./series_class_res"
