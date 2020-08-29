@@ -20,12 +20,15 @@ class OCR():
         self.di = []
         self.box_dict = box_dict
         self.match_leg_img = None
+        self.leg_box = None
+        self.leg_text_boxes = {}
+        self.crop_amount = 35
         # self.remove_noise()
         # self.thresholding()
         self.mser()
         
-        print(self.img[0][0])
-        print(self.img[10][5])
+        #print(self.img[0][0])
+        #print(self.img[10][5])
         self.dimensions = self.img.shape
         self.LEFT_THRESHOLD = self.dimensions[1] / 5
         self.BOTTOM_THRESHOLD = self.dimensions[0] / 5
@@ -33,17 +36,15 @@ class OCR():
         for res,col in segImg:
             self.seg[tuple(col)] = res
         #self.d = pytesseract.image_to_data(self.img, output_type=Output.DICT)
-        #self.n_boxes = len(self.d['text'])
         self.seriesCorsp = {}
     
     def isREGEX(self, string):
-        regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]') # adding hyphons to prevent dashed legend lines from confusing the ocr
+        regex = re.compile('[.@=»_!#$%^&*()<>?/\|}{~:]') # adding hyphons to prevent dashed legend lines from confusing the ocr
         return (regex.search(string) == None)
 
     def remove_key(self, box):
-        crop_amount = 35
         (xmin, ymin, xmax, ymax) = box
-        return (xmin+crop_amount, ymin, xmax, ymax)
+        return (xmin+self.crop_amount, ymin, xmax, ymax)
 
     def crop(self):
         text_dict = {}
@@ -55,21 +56,33 @@ class OCR():
             crp_img = crp_img.crop(box)
             if self.box_dict[box] == 'y axis':
                 crp_img = crp_img.rotate(270, expand=True) # might need to be more general in the future
-                crp_img.show()
+                #crp_img.show()
             if self.box_dict[box] == 'legend':
+                #(xmin, ymin, xmax, ymax) = box
+                #newbox = (xmin-50, ymin, xmax, ymax)
                 leg_crop = self.image_obj
                 leg_crop = leg_crop.crop(self.remove_key(box))
+                #crp_img = self.image_obj.crop(newbox)
                 crp_img.show()
                 leg_crop.show()
                 self.match_leg_img = crp_img
+                self.leg_box = box
                 crp_img = leg_crop
             # break
-            #crpD = pytesseract.image_to_data(crp_img, config='--psm 12 -c tessedit_char_whitelist=0123456789.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', output_type=Output.DICT)
-            crpD = pytesseract.image_to_data(crp_img, output_type=Output.DICT) # note change back to crp_img
+            crpD = pytesseract.image_to_data(crp_img, config='--psm 3 -c tessedit_char_whitelist=0123456789-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', output_type=Output.DICT)
+            #crpD = pytesseract.image_to_data(crp_img, output_type=Output.DICT) # note change back to crp_img
+            n_boxes = len(crpD['text'])
             strlist = []
-            for elem in crpD['text']:
-                if (not elem.isspace()) and elem!='' and self.isREGEX(elem) and elem!=',':
-                    strlist.append(elem)#st + " " + elem
+            # for elem in crpD['text']:
+            #     if (not elem.isspace()) and elem!='' and self.isREGEX(elem) and elem!=',':
+            #         strlist.append(elem)#st + " " + elem
+            for i in range(0,n_boxes):
+                elem = crpD['text'][i]
+                if (not elem.isspace()) and elem!='' and elem!=',' and elem!='-' and elem!='—' and elem!='_': #and self.isREGEX(elem) 
+                    strlist.append(elem)
+                    if self.box_dict[box] == 'legend':
+                        self.leg_text_boxes[elem] = (crpD['left'][i] + (crpD['width'][i])/2, crpD['top'][i] + (crpD['height'][i])/2) # 
+
             text_dict[self.box_dict[box]] = strlist
 
             # if self.box_dict[box] == 'legend':
@@ -98,7 +111,7 @@ class OCR():
             counter+=1
         self.idvdilen = len(contours)
         #print(array_of_texts)
-        print('len of cont: ' + str(self.idvdilen))
+        #print('len of cont: ' + str(self.idvdilen))
         
         
         self.di.append({'text': ['now on to method #2']})

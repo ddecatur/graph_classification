@@ -10,6 +10,8 @@ import colorsys
 from k_means_clustering import *
 import math
 
+setK = None
+
 def col_dist(c1,c2):
     (r,g,b) = c1
     (R,G,B) = c2
@@ -46,8 +48,7 @@ def idColor(image):#'./testttttt.png'):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert color
     image = image.reshape((image.shape[0] * image.shape[1], 3))
     
-
-    clt = KMeansCluster(image,ogImg)
+    clt = KMeansCluster(image,ogImg)#,setK)
     hist = clusterCounts(clt)
     posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b', (0,0,0):'black', (255,255,255):'white'}
     # determine which colors to segment out
@@ -123,7 +124,7 @@ def find_ranges(h,s,v):
         lh.append(0)
         uh.append(uspill)
     sl = max(s-25,0)
-    vl = max(v-40,0) # should be -40
+    vl = max(v-40,76.5) # should be -40 # 
     su = min(s+25,255) # should be +10
     vu = min(v+40,255)
     for i,bound in enumerate(lh):
@@ -152,10 +153,13 @@ def hsvRange (rgbList):
 def hsv_col_str():
     return 2
 
-def segmentImg(img='./testttttt.png'):
+def segmentImg(img='./testttttt.png', fixed_k=None):
     '''
-    Givn an image path, segment out any blue from that image
+    Givn an image path, segment out colors from that image
     '''
+    global setK
+    setK = fixed_k
+
     # read in image
     graph = cv2.imread(img)
     graph = cv2.cvtColor(graph, cv2.COLOR_BGR2RGB) # convert color from BGR to RGB

@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from predict import predictCategory
 
-
 # clustering code adapted from https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
 def clusterCounts(clt):
 	numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
@@ -39,8 +38,13 @@ def find_k(x):
   return pred+2
 
 # Implement the K Means Clustering
-def KMeansCluster (imageArr,img):
-    k = find_k(img) # 3 # hard coding this to save time for now
+def KMeansCluster (imageArr,img):#, setK):
+    k = find_k(img)
+    print("k is: " + str(k))
+    # if setK!=None:
+    #   k = setK
+    # else:
+    #   k = find_k(img) # 3 # hard coding this to save time for now
     clt = KMeans(n_clusters = k)
     clt.fit(imageArr)
     return clt

@@ -116,7 +116,7 @@ def record_boxes(image,
     track_ids=None,
     use_normalized_coordinates=False,
     max_boxes_to_draw=20,
-    min_score_thresh=.5,
+    min_score_thresh=.2,
     agnostic_mode=False,
     # line_thickness=4,
     # groundtruth_box_visualization_color='black',
@@ -158,13 +158,13 @@ def record_boxes(image,
 
   box_dic['image_height'] = image.shape[0]
   box_dic['image_width'] = image.shape[1]
-  print(box_dic['image_height'])
-  print(box_dic['image_width'])
+  # print(box_dic['image_height'])
+  # print(box_dic['image_width'])
   #print(box_dic)
-  for k in box_dic:
-      if k != 'image_width' and k != 'image_height':
-        for elem in box_dic[k]:
-            (box, score) = elem
+  # for k in box_dic:
+  #     if k != 'image_width' and k != 'image_height':
+  #       for elem in box_dic[k]:
+  #           (box, score) = elem
             # print(k)
             # print(box)
             # print(score)
