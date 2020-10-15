@@ -21,7 +21,7 @@ with open(args.instF) as f:
 n = instr.get('learnNum')
 seg = instr.get('seg')
 sN = instr.get('seriesNum')
-ST = instr.get('seriesTrain')
+GP = instr.get('genPurpose')
 
 i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
@@ -30,7 +30,7 @@ for i in range(0,n): # run the classiciation model n times for the given color s
     # if seg:
     #     saveGraphs()
     #     cleanReg(cwd)
-    if ST:
+    if GP == 'series_train':
         series_classification(cwd, i)
         cleanSeries(cwd)
     else:

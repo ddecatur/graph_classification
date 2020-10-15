@@ -13,30 +13,44 @@ import re
 
 class OCR():
 
-    def __init__(self, image, segImg, box_dict): # , rotation=):
+    def __init__(self, image, segImg, box_dict, k): # , rotation=):
         self.img = cv2.imread(image)
+        #self.img = self.img*0.5
+        self.img = cv2.resize(self.img, (0,0), fx=3, fy=3)
+        #self.img = cv2.GaussianBlur(self.img,(11,11),0)
+        #self.img = cv2.medianBlur(self.img,9)
+        print('save')
+        im = Image.fromarray(self.img)
+        im.save("images/test.png")
+        #self.img = cv2.GaussianBlur(self.img,(11,11),0)
+        #self.img = cv2.medianBlur(self.img,9)
         self.image_obj = Image.open(image)
         self.get_grayscale()
-        self.di = []
+        #self.di = []
         self.box_dict = box_dict
         self.match_leg_img = None
         self.leg_box = None
         self.leg_text_boxes = {}
         self.crop_amount = 35
+        self.k = k
+        self.xAxisLab = None
+        self.yAxisLab = None
+        self.title = None
+        self.legend = []
         # self.remove_noise()
         # self.thresholding()
-        self.mser()
-        
+        #self.mser()
         #print(self.img[0][0])
         #print(self.img[10][5])
         self.dimensions = self.img.shape
-        self.LEFT_THRESHOLD = self.dimensions[1] / 5
-        self.BOTTOM_THRESHOLD = self.dimensions[0] / 5
-        self.seg = {}
-        for res,col in segImg:
-            self.seg[tuple(col)] = res
-        #self.d = pytesseract.image_to_data(self.img, output_type=Output.DICT)
-        self.seriesCorsp = {}
+        #self.LEFT_THRESHOLD = self.dimensions[1] / 5
+        #self.BOTTOM_THRESHOLD = self.dimensions[0] / 5
+        #self.seg = {}
+        #for res,col in segImg:
+            #self.seg[tuple(col)] = res
+        self.d = pytesseract.image_to_data(self.img, config='--psm 3 -c tessedit_char_whitelist=0123456789-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', output_type=Output.DICT)
+        self.get_boxes()
+        #self.seriesCorsp = {}
     
     def isREGEX(self, string):
         regex = re.compile('[.@=»_!#$%^&*()<>?/\|}{~:]') # adding hyphons to prevent dashed legend lines from confusing the ocr
@@ -63,8 +77,8 @@ class OCR():
                 leg_crop = self.image_obj
                 leg_crop = leg_crop.crop(self.remove_key(box))
                 #crp_img = self.image_obj.crop(newbox)
-                crp_img.show()
-                leg_crop.show()
+                #crp_img.show()
+                #leg_crop.show()
                 self.match_leg_img = crp_img
                 self.leg_box = box
                 crp_img = leg_crop
@@ -89,6 +103,64 @@ class OCR():
             #     for token in st.split():
                     
         return text_dict
+
+    def dist(self,p1,p2):
+        return math.sqrt(((p1[0]-p2[0])**2) + ((p1[1]-p2[1])**2))
+
+    def get_boxes(self):
+        print(self.dimensions)
+        #xMin, yMax = self.dimensions[1], 0
+        maxY = self.dimensions[0]
+        xMaxDP, yMaxDP, yMaxDP2 = 0, 0, 0
+        xMidPos = self.dimensions[1]//2
+        yMidPos = self.dimensions[0]//2
+        yMaxDPIdx = None
+        yMaxDPIdx2 = None
+        xMaxDPIdx = None
+        maxYIdx = None
+        minDPIdx = None
+        minDP = max(self.dimensions[0],self.dimensions[1])
+        n_boxes = len(self.d['text'])
+        print(self.d['text'])
+        #print(self.d['top'])
+        for i in range(n_boxes):
+            elem = self.d['text'][i]
+            if (not elem.isspace()) and elem!='' and elem!=',' and elem!='-' and elem!='—' and elem!='_': #int(self.d['conf'][i]) > 60 and 
+                #print((elem, self.d['top'][i]))
+                (x,y) = (self.d['left'][i] + (self.d['width'][i])/2, self.d['top'][i] + (self.d['height'][i])/2)
+                if abs(x-xMidPos) >= xMaxDP:
+                    xMaxDP = abs(x-xMidPos)
+                    xMaxDPIdx = i
+                if y < maxY: # because reverse coordinates
+                    maxY = y
+                    maxYIdx = i
+                if abs(y-yMidPos) >= yMaxDP:
+                    yMaxDP2 = yMaxDP
+                    yMaxDPIdx2 = yMaxDPIdx
+                    yMaxDP = abs(y-yMidPos)
+                    yMaxDPIdx = i
+                elif abs(y-yMidPos) >= yMaxDP2:
+                    yMaxDP2 = abs(y-yMidPos)
+                    yMaxDPIdx2 = i
+                dst = self.dist((x,y), (xMidPos,yMidPos))
+                if dst < minDP:
+                    minDP = dst
+                    minDPIdx = i
+        if xMaxDPIdx is not None:
+            self.yAxisLab = self.d['text'][xMaxDPIdx]
+        if yMaxDPIdx is not None:
+            if yMaxDPIdx != maxYIdx:
+                self.xAxisLab = self.d['text'][yMaxDPIdx]
+            elif yMaxDPIdx2 is not None:
+                self.xAxisLab = self.d['text'][yMaxDPIdx2]
+        if maxYIdx is not None:
+            self.title = self.d['text'][maxYIdx]
+        #print((self.yAxisLab,self.title))
+        #self.legend.append(self.d['text'][minDPIdx])
+        #print('legend:')
+        #print(self.legend)
+        # for i in range(n_boxes):
+        #     while len(self.legend < 3):
 
 
     def mser(self):
@@ -192,8 +264,6 @@ class OCR():
             self.xAxisLab = self.d['text'][xMinIdx]
             self.yAxisLab = self.d['text'][yMaxIdx]
     
-    def dist(self,p1,p2):
-        return math.sqrt(((p1[0]-p2[0])**2) + ((p1[1]-p2[1])**2))
 
     def bbDist(self): # O(n*m)
         for i in range(0, self.n_boxes):

@@ -18,7 +18,7 @@ def series_classification (path_to_data, n):
         print("series_classification called from wrong directory")
     else:
         # set necessary directories
-        PATH = os.path.join(path_to_data, 'series_filtered')
+        PATH = os.path.join(path_to_data, '1000_series_filtered')
         train_dir = os.path.join(PATH, 'train')
         validation_dir = os.path.join(PATH, 'validation')
         train_1_dir = os.path.join(train_dir, '1')  # directory with our training positive pictures
@@ -45,8 +45,8 @@ def series_classification (path_to_data, n):
         IMG_WIDTH = 150
 
         #prepare data
-        train_image_generator = ImageDataGenerator(rescale=1./255) # Generator for our training data
-        validation_image_generator = ImageDataGenerator(rescale=1./255) # Generator for our validation data
+        train_image_generator = ImageDataGenerator(rescale=1./255)#, width_shift_range=[-200,200], height_shift_range=0.5) # Generator for our training data
+        validation_image_generator = ImageDataGenerator(rescale=1./255)#, width_shift_range=[-200,200], height_shift_range=0.5) # Generator for our validation data
 
         #load images from disc
         train_data_gen = train_image_generator.flow_from_directory(batch_size=batch_size,

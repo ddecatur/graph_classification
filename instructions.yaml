@@ -1,9 +1,9 @@
-size: 1
+size: 10
 graphType: 'random,random'
 color: 'multi,multi'  # multi for multi-colored, anything else for single color
-dataStyle: 'solid,multi'  # same issue here that multi had, fix later
+dataStyle: 'multi,multi'  # same issue here that multi had, fix later
 verbose: False
 learnNum: 1
 seg: True
-seriesTrain: False # whether or not you want to train the series classifier or the graph classifier
+genPurpose: 'series_train' # whether or not you want to train the series classifier or the graph classifier
 seriesNum: multi # whether or not you want the option of multi series graphs

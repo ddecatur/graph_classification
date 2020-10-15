@@ -1,6 +1,7 @@
 # import libraries
 import matplotlib.pyplot as plt
 import numpy as np
+from random import choice as randomchoice
 from numpy.random import randint
 from numpy.random import random
 from numpy.random import randn
@@ -15,81 +16,7 @@ import math
 import os
 import csv
 import math
-
-def create_scatter_graph (n, train_val, multi, verbose=0): 
-
-    # seed random number generator -- uncomment line below to turn seeding on
-    # seed(n)
-
-    # generate correlation -- equations adapted from: http://hosting.astro.cornell.edu/~cordes/A6523/GeneratingCorrelatedRandomVariables.pdf
-    sign = [-1,1]
-    correlation = choice(sign) * random()
-    if verbose:
-        print(correlation)
-    Y1 = randn(1000)
-    Y2 = randn(1000)
-    phi = (0.5) * math.asin(correlation)
-    a = math.cos(phi)
-    b = math.sin(phi)
-    c = math.sin(phi)
-    d = math.cos(phi)
-    X1 = (a * Y1) + (b * Y2)
-    X2 = (c * Y1) + (d * Y2)
-
-    # Calculate Correlation -- will be very similar to intended correlation for large data inputs
-    # Following code adapted from: https://machinelearningmastery.com/how-to-use-correlation-to-understand-the-relationship-between-variables/
-    # ------------------------------------------
-    # calculate covariance matrix
-    covariance = cov(X1, X2)
-    if verbose:
-        print(covariance)
-
-    # calculate Pearson's correlation
-    corr, _ = pearsonr(X1, X2)
-    if verbose:
-        print('Pearsons correlation: %.3f' % corr)
-
-    # calculate spearman's correlation
-    corr, _ = spearmanr(X1, X2)
-    if verbose:
-        print('Spearmans correlation: %.3f' % corr)
-    # ------------------------------------------
-
-    # plot
-    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi == 'multi':
-        col = choice(colors)
-    else:
-        col = 'b'
-    fig, ax = plt.subplots()
-    ax.scatter(X1, X2, color=col)
-
-
-
-    if corr >= 0.4:
-        s = "positive"
-        simpcorr = 1
-    elif corr <= -0.4:
-        s = "negative"
-        simpcorr = -1
-    else:
-        s = "neutral"
-        simpcorr = 0
-
-    # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + s + "/" + "reg_scatter_graph" + str(n) + ".png"
-
-    # create ordered pair
-    ret = ("graph" + str(n), corr, simpcorr) #(fname, correlation, rounded correlation)
-
-    plt.xlabel('X1')
-    plt.ylabel('X2')
-    plt.title(s + " Correlation")
-    #plt.legend()
-    #print(fname)
-    #plt.show()
-    #fig.savefig(fname)
-    return ret
+import string
 
 # create perturbed data
 def genData(dataType):
@@ -111,11 +38,11 @@ def genData(dataType):
         X1 = np.arange(50)
         X2 = (m * X1) + delta
         
-        # adjust intercept to make bar graph not cross y axis
-        minVal = min(X2)
-        #print(minVal)
-        b = 0 - minVal
-        X2 = (m * X1) + b + delta
+        # # adjust intercept to make bar graph not cross y axis
+        # minVal = min(X2)
+        # #print(minVal)
+        # b = 0 - minVal
+        # X2 = (m * X1) + b + delta
     elif dataType == 'scatter':
         sign = [-1,1]
         correlation = choice(sign) * random()
@@ -133,90 +60,10 @@ def genData(dataType):
     corr = corr, _ = spearmanr(X1, X2) # spearman correlation
     return (X1,X2,corr)
 
-# line graph generator
-def create_line_graph (n, train_val, multi, lineType, verbose=0):
-
-    #determine variables
-    (X1, X2, corr) = genData('line')
-    
-    # colors
-    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi == 'multi':
-        col = choice(colors)
-    else:
-        col = 'b'
-
-    # lineStyles
-    lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    if lineType == 'multi':
-        lineStyle = choice(lineStyles)
-    else:
-        lineStyle = 'solid'
-    
-    # determine correlation
-    if corr >= 0.4:
-        correlation = 'positive'
-    elif corr <= -0.4:
-        correlation = 'negative'
-    else:
-        correlation = 'neutral'
-
-
-    # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "reg_line_graph" + str(n) + ".png"
-
-    # plot
-    fig, ax = plt.subplots()
-    plt.plot(X1,X2, color = col, linestyle=lineStyle)
-    plt.xlabel('X1')
-    plt.ylabel('X2')
-    plt.title(correlation + " Correlation")
-    #plt.show
-    #fig.savefig(fname)
-    return ("line_graph" + str(n), float(corr), correlation)
-
-# Bar graph generator
-def create_bar_graph (n, train_val, multi, barType, verbose=0):
-
-    # determine variables
-    (X1,X2,corr) = genData('bar')
-    
-    # colors
-    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    if multi == 'multi':
-        col = choice(colors)
-    else:
-        col = 'b'
-
-    # lineStyles
-    barStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    if barType == 'multi':
-        barStyle = choice(barStyles)
-    else:
-        barStyle = 'solid'
-    
-    # determine correlation
-    if corr >= 0.5:
-        correlation = 'positive'
-    elif corr <= -0.5:
-        correlation = 'negative'
-    else:
-        correlation = 'neutral'
-
-
-    # name the given graph
-    fname = "graphs_filtered/" + train_val + "/" + correlation + "/" + "reg_bar_graph" + str(n) + ".png"
-
-    # plot
-    fig, ax = plt.subplots()
-    plt.bar(X1,X2, color = col, linestyle=barStyle)
-    plt.xlabel('X1')
-    plt.ylabel('X2')
-    plt.title(correlation + " Correlation")
-    #plt.show
-    #fig.savefig(fname)
-    return ("bar_graph" + str(n), float(corr), correlation)
-
+def col_dist(c1,c2):
+    (r,g,b) = c1
+    (R,G,B) = c2
+    return math.sqrt((r-R)**2 + (g-G)**2 + (b-B)**2)
 
 def find_nearest_col(color, dic):
     dist = list()
@@ -231,15 +78,22 @@ def find_nearest_col(color, dic):
     return minC
     
     
+def get_random_string(length):
+    # Random string with the combination of lower and upper case
+    letters = string.ascii_letters
+    res = ''.join(randomchoice(letters) for i in range(length))
+    return res
 
-# create multi data graph
+# # create multi data graph
 def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, verbose=0):
     
     #determine variables
     STcopy = seriesType
-    possSeries = ['line', 'scatter'] #'bar']
-    if sN == 1:
-        possSeries.append('bar')
+    possSeries = ['line', 'scatter', 'bar']
+    #sN = 3
+    # if sN == 1:
+    #     possSeries.append('bar')
+    #possSeries = ['bar']
     varArr = np.empty (sN, tuple)
     for i in range (0,sN):
         if STcopy == 'random':
@@ -257,7 +111,10 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
     if dcolor == 'multi2':
         colors = ['y', 'c', 'm']#colors = ['y', 'c', 'm', 'r', 'g', 'b']
         posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}#posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y', (255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
-    
+    #colors = ['y', 'c', 'm', 'r', 'g', 'b']
+
+    #posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y', (255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
+
     copyC = colors
     colArr = np.empty(sN, str)
     for i in range (0, sN):
@@ -276,40 +133,62 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
         for i in range (0, sN):
             LSarr.append('solid')
 
+
     # plot
+    label_to_corr_map = {}
+    correlation = {}
     corr = list()
     fig, ax = plt.subplots()
+    plot_options = plt.style.available
+    if 'grayscale' in plot_options:
+        plot_options.remove('grayscale')
+    if 'dark_background' in plot_options:
+        plot_options.remove('dark_background')
+    # if 'dark_background' in plot_options:
+    #     plot_options.remove('dark_background')
+    # if train_val == 'train':
+    #     plt.style.use('classic')
+    # else:
+    #     plt.style.use('ggplot')
+    plt.style.use('default')
+    style = choice(plot_options)
+    plt.style.use(style)
     for i,var in enumerate(varArr):
         ((X1,X2,corrph),GT) = var
-        corr.append(corrph)
-        if GT == 'line':
-            plt.plot(X1, X2, color=colArr[i], linestyle=LSarr[i], label=('series' + str(i)))
-        elif GT == 'scatter':
-            ax.scatter(X1, X2, color=colArr[i], label=('series' + str(i)))
-        elif GT == 'bar':
-            plt.bar(X1,X2, color=colArr[i], label=('series' + str(i)))
-        else:
-            raise ValueError('graph type not recognized')
-
-
-    plt.xlabel('X1')
-    plt.ylabel('X2')
-    ax.legend()
-    plt.title(str(sN) + " Series")
-    
-    
-    # determine correlations
-    correlation = {}
-    for i in range(0,sN):
-        if corr[i] >= 0.4:
+        if corrph >= 0.4:
             correlation[colArr[i]] = 'positive'
-        elif corr[i] <= -0.4:
+        elif corrph <= -0.4:
             correlation[colArr[i]] = 'negative'
         else:
             correlation[colArr[i]] = 'neutral'
+        lbl = get_random_string(randint(3,12))
+        label_to_corr_map[lbl] = correlation[colArr[i]]
+        if GT == 'line':
+            plt.plot(X1, X2, linestyle=LSarr[i], label=lbl) # color=colArr[i], 
+        elif GT == 'scatter':
+            ax.scatter(X1, X2, label=lbl) # color=colArr[i], 
+        elif GT == 'bar':
+            w = 0.8 #* len(varArr)
+            ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl) # color=colArr[i], 
+        else:
+            raise ValueError('graph type not recognized')
+
+    # randomize label and title positions and  strings
+    ylabelpos = ['left', 'right']
+    xlabelpos = ['top', 'bottom']
+    tpos = ylabelpos + ['center']
+    X1s = get_random_string(randint(3,12))
+    X2s = get_random_string(randint(3,12))
+    titlestr = get_random_string(randint(3,12))
+    plt.xlabel(X1s, labelpad=randint(2,10))
+    plt.ylabel(X2s, labelpad=randint(2,10))
+    ax.xaxis.set_label_position(choice(xlabelpos))
+    ax.yaxis.set_label_position(choice(ylabelpos))
+    leg = ax.legend()
+    tobj = ax.set_title(titlestr,loc=choice(tpos))
+    fig.canvas.draw()
 
     # name the given graph
-    #corr_list_str = '$'.join(correlation)
     if model == 'g':
         fname = "placeholder.png"
         fig.savefig(fname)
@@ -318,28 +197,29 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
             closeCol = find_nearest_col(col,posRGB)
             if closeCol in correlation:
                 corrstr = correlation[closeCol]
-                fname = "graphs_filtered/" + train_val + "/" + corrstr + "/" + "seg_" + corrstr + "_" + closeCol + str(i) + "_" + seriesType + "_graph" + str(n) + ".png"
+                fname = "graphs_filtered/" + train_val + "/" + corrstr + "/" + "seg_" + corrstr + "_" + closeCol + str(i) + "_" + seriesType + "_graph" + str(n) + ".png" # changed to jpg
                 plt.imsave(fname,img)
             else:
                 print('closest color not found')
                 print(col)
         plt.close('all')
-        #fname = "graphs_filtered/" + train_val + "/" + corr_list_str + "/" + "reg_line_graph" + str(n) + ".png"
+    elif model == 's':
+        fname = "series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_graph" + str(n) + ".png" # changed to jpg
+        fig.savefig(fname)
+        img = cv2.imread(fname)
+        img = sat_thresh_filter(img,30)
+        im = Image.fromarray(img)
+        im.save(fname)
+        plt.close()
     else:
-        # closeCol = colArr[0]
-        # if closeCol in correlation:
-        #     corrstr = correlation[closeCol]
-        #     fname = "test"+corrstr+str(n)+".png" #"series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
-        #     fig.savefig(fname)
-        fname = "series_filtered/" + train_val + "/" + str(sN) + "/" + str(sN) + "_reg_line_graph" + str(n) + ".png"
+        # name the given graph
+        fname = "images/" + "graph_" + str(n) + ".png"
         fig.savefig(fname)
         plt.close()
+        return ("graph_" + str(n), X1s, X2s, titlestr, label_to_corr_map)
     
-    
+    return ("line_graph" + str(n), float(corrph), "placeholder")
 
-
-    #fig.savefig(fname)
-    return ("line_graph" + str(n), float(corr[0]), "placeholder")
 
 # create the training data
 def create_training_data(size, seriesNum, graphType, color, dataStyle, v, directory):
@@ -474,6 +354,3 @@ def train_series_class(size, sN, dataStyle, directory):
             sNopC = int(choice(sNop))
             create_multiData(i, sNopC, 'train', 'random', 'multi', dataStyle, 's')
             create_multiData(i, sNopC, 'validation', 'random', 'multi', dataStyle, 's')
-
-# for i in range (0,5):
-#     create_multiData(i+1,1,'train','random','multi','s')

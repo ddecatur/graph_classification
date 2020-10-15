@@ -10,12 +10,16 @@ from numpy.random import seed
 from numpy import cov
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
+from create_graph import *
 import sys
 import math
 import os
 import csv
 import math
+import glob
 from pipeline import *
+from seg_img import sat_thresh_filter
+from k_means_clustering import num_diff_cols
 
 IMG_HEIGHT = 480
 IMG_WIDTH = 640
@@ -43,159 +47,159 @@ def editfast(s,t):
     
     return rtn
 
-def get_random_string(length):
-    # Random string with the combination of lower and upper case
-    letters = string.ascii_letters
-    res = ''.join(randomchoice(letters) for i in range(length))
-    return res
+# def get_random_string(length):
+#     # Random string with the combination of lower and upper case
+#     letters = string.ascii_letters
+#     res = ''.join(randomchoice(letters) for i in range(length))
+#     return res
 
-# create perturbed data
-def genData(dataType):
-    # determine variables
-    if dataType == 'line':
-        # slope and intercept
-        sign = [-1,1]
-        m = choice(sign) * random() # determine slope
-        b = choice(sign) * randint(0,25) * random() # determine intercept
-        delta = np.random.uniform(-50,50, size=(100,))
-        X1 = np.arange(100)
-        X2 = (m * X1) + b + delta
-    elif dataType == 'bar':
-        # slope and intercept
-        sign = [-1,1]
-        m = choice(sign) * random() # determine slope
-        #b = choice(sign) * randint(0,50) * random() # determine intercept
-        delta = np.random.uniform(-15,15, size=(50,))
-        X1 = np.arange(50)
-        X2 = (m * X1) + delta
+# # create perturbed data
+# def genData(dataType):
+#     # determine variables
+#     if dataType == 'line':
+#         # slope and intercept
+#         sign = [-1,1]
+#         m = choice(sign) * random() # determine slope
+#         b = choice(sign) * randint(0,25) * random() # determine intercept
+#         delta = np.random.uniform(-50,50, size=(100,))
+#         X1 = np.arange(100)
+#         X2 = (m * X1) + b + delta
+#     elif dataType == 'bar':
+#         # slope and intercept
+#         sign = [-1,1]
+#         m = choice(sign) * random() # determine slope
+#         #b = choice(sign) * randint(0,50) * random() # determine intercept
+#         delta = np.random.uniform(-15,15, size=(50,))
+#         X1 = np.arange(50)
+#         X2 = (m * X1) + delta
         
-        # adjust intercept to make bar graph not cross y axis
-        minVal = min(X2)
-        #print(minVal)
-        b = 0 - minVal
-        X2 = (m * X1) + b + delta
-    elif dataType == 'scatter':
-        sign = [-1,1]
-        correlation = choice(sign) * random()
-        Y1 = randn(1000)
-        Y2 = randn(1000)
-        phi = (0.5) * math.asin(correlation)
-        a = math.cos(phi)
-        b = math.sin(phi)
-        c = math.sin(phi)
-        d = math.cos(phi)
-        X1 = (a * Y1) + (b * Y2)
-        X2 = (c * Y1) + (d * Y2)
+#         # adjust intercept to make bar graph not cross y axis
+#         minVal = min(X2)
+#         #print(minVal)
+#         b = 0 - minVal
+#         X2 = (m * X1) + b + delta
+#     elif dataType == 'scatter':
+#         sign = [-1,1]
+#         correlation = choice(sign) * random()
+#         Y1 = randn(1000)
+#         Y2 = randn(1000)
+#         phi = (0.5) * math.asin(correlation)
+#         a = math.cos(phi)
+#         b = math.sin(phi)
+#         c = math.sin(phi)
+#         d = math.cos(phi)
+#         X1 = (a * Y1) + (b * Y2)
+#         X2 = (c * Y1) + (d * Y2)
     
-    # calculate correlation
-    corr = corr, _ = spearmanr(X1, X2) # spearman correlation
-    return (X1,X2,corr)
+#     # calculate correlation
+#     corr = corr, _ = spearmanr(X1, X2) # spearman correlation
+#     return (X1,X2,corr)
 
 
-# create multidata
-def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, verbose=0):
+# # create multidata
+# def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, verbose=0):
     
-    #determine variables
-    STcopy = seriesType
-    possSeries = ['line', 'scatter'] #'bar']
-    if sN == 1:
-        possSeries.append('bar')
-    possSeries = ['scatter']
-    varArr = np.empty (sN, tuple)
-    for i in range (0,sN):
-        if STcopy == 'random':
-            STcopy = choice(possSeries)
-        if STcopy == 'line':
-            varArr[i] = (genData('line'),'line')
-        elif STcopy == 'bar':
-            varArr[i] = (genData('bar'),'bar')
-        elif STcopy == 'scatter':
-            varArr[i] = (genData('scatter'),'scatter')
+#     #determine variables
+#     STcopy = seriesType
+#     possSeries = ['line', 'scatter'] #'bar']
+#     if sN == 1:
+#         possSeries.append('bar')
+#     possSeries = ['scatter']
+#     varArr = np.empty (sN, tuple)
+#     for i in range (0,sN):
+#         if STcopy == 'random':
+#             STcopy = choice(possSeries)
+#         if STcopy == 'line':
+#             varArr[i] = (genData('line'),'line')
+#         elif STcopy == 'bar':
+#             varArr[i] = (genData('bar'),'bar')
+#         elif STcopy == 'scatter':
+#             varArr[i] = (genData('scatter'),'scatter')
 
-    # colors
-    colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
-    #posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
-    if dcolor == 'multi2':
-        colors = ['y', 'c', 'm']#colors = ['y', 'c', 'm', 'r', 'g', 'b']
-        #posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}#posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y', (255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
+#     # colors
+#     colors = ['r', 'g', 'b'] # add other colors to see if it affects learning
+#     #posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
+#     if dcolor == 'multi2':
+#         colors = ['y', 'c', 'm']#colors = ['y', 'c', 'm', 'r', 'g', 'b']
+#         #posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y'}#posRGB = {(0,255,255):'c', (255,0,255):'m', (255,255,0):'y', (255,0,0):'r', (0,128,0):'g', (0,0,255):'b'}
     
-    copyC = colors
-    colArr = np.empty(sN, str)
-    for i in range (0, sN):
-        elem = choice(copyC)
-        colArr[i] = elem
-        copyC.remove(elem)
+#     copyC = colors
+#     colArr = np.empty(sN, str)
+#     for i in range (0, sN):
+#         elem = choice(copyC)
+#         colArr[i] = elem
+#         copyC.remove(elem)
 
 
-    # lineStyles
-    lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
-    LSarr = list()
-    if dataStyle == 'multi':
-        for i in range (0, sN):
-            LSarr.append(choice(lineStyles))
-    else:
-        for i in range (0, sN):
-            LSarr.append('solid')
+#     # lineStyles
+#     lineStyles = ['solid', 'dotted', 'dashed', 'dashdot']
+#     LSarr = list()
+#     if dataStyle == 'multi':
+#         for i in range (0, sN):
+#             LSarr.append(choice(lineStyles))
+#     else:
+#         for i in range (0, sN):
+#             LSarr.append('solid')
 
-    # plot
-    label_to_corr_map = {}
-    fig, ax = plt.subplots()
-    for i,var in enumerate(varArr):
-        ((X1,X2,corrph),GT) = var
-        if corrph >= 0.4:
-            correlation = 'positive'
-        elif corrph <= -0.4:
-            correlation = 'negative'
-        else:
-            correlation = 'neutral'
-        lbl = get_random_string(randint(3,12))
-        label_to_corr_map[lbl] = correlation
-        if GT == 'line':
-            plt.plot(X1, X2, color=colArr[i], linestyle=LSarr[i], label=lbl)
-        elif GT == 'scatter':
-            ax.scatter(X1, X2, color=colArr[i], label=lbl)
-        elif GT == 'bar':
-            plt.bar(X1,X2, color=colArr[i], label=lbl)
-        else:
-            raise ValueError('graph type not recognized')
+#     # plot
+#     label_to_corr_map = {}
+#     fig, ax = plt.subplots()
+#     for i,var in enumerate(varArr):
+#         ((X1,X2,corrph),GT) = var
+#         if corrph >= 0.4:
+#             correlation = 'positive'
+#         elif corrph <= -0.4:
+#             correlation = 'negative'
+#         else:
+#             correlation = 'neutral'
+#         lbl = get_random_string(randint(3,12))
+#         label_to_corr_map[lbl] = correlation
+#         if GT == 'line':
+#             plt.plot(X1, X2, color=colArr[i], linestyle=LSarr[i], label=lbl)
+#         elif GT == 'scatter':
+#             ax.scatter(X1, X2, color=colArr[i], label=lbl)
+#         elif GT == 'bar':
+#             plt.bar(X1,X2, color=colArr[i], label=lbl)
+#         else:
+#             raise ValueError('graph type not recognized')
 
 
-    # randomize label and title positions and  strings
-    ylabelpos = ['left', 'right']
-    xlabelpos = ['top', 'bottom']
-    tpos = ylabelpos + ['center']
-    X1s = get_random_string(randint(3,12))
-    X2s = get_random_string(randint(3,12))
-    titlestr = get_random_string(randint(3,12))
-    plt.xlabel(X1s, labelpad=randint(2,10))
-    plt.ylabel(X2s, labelpad=randint(2,10))
-    ax.xaxis.set_label_position(choice(xlabelpos))
-    ax.yaxis.set_label_position(choice(ylabelpos))
-    leg = ax.legend()
-    #plt.title(titlestr, loc=choice(tpos))
-    tobj = ax.set_title(titlestr,loc=choice(tpos))
-    fig.canvas.draw()
+#     # randomize label and title positions and  strings
+#     ylabelpos = ['left', 'right']
+#     xlabelpos = ['top', 'bottom']
+#     tpos = ylabelpos + ['center']
+#     X1s = get_random_string(randint(3,12))
+#     X2s = get_random_string(randint(3,12))
+#     titlestr = get_random_string(randint(3,12))
+#     plt.xlabel(X1s, labelpad=randint(2,10))
+#     plt.ylabel(X2s, labelpad=randint(2,10))
+#     ax.xaxis.set_label_position(choice(xlabelpos))
+#     ax.yaxis.set_label_position(choice(ylabelpos))
+#     leg = ax.legend()
+#     #plt.title(titlestr, loc=choice(tpos))
+#     tobj = ax.set_title(titlestr,loc=choice(tpos))
+#     fig.canvas.draw()
     
     
 
-    # name the given graph
-    fname = "images/" + "graph_" + str(n) + ".jpg"
-    fig.savefig(fname)
-    rend = fig.canvas.get_renderer()
-    #print(rend)
-    lbb = leg.get_window_extent(renderer=rend)
-    #l_coords = leg.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-    #xlbl_coords = ax.xaxis.get_window_extent(renderer=rend)#l_coords = leg.get_frame().get_bbox().bounds
-    xlbl = ax.xaxis.get_label()
-    ylbl = ax.yaxis.get_label()
-    xlbb = xlbl.get_window_extent()
-    ylbb = ylbl.get_window_extent()
-    tbb = tobj.get_window_extent()
+#     # name the given graph
+#     fname = "images/" + "graph_" + str(n) + ".jpg"
+#     fig.savefig(fname)
+#     rend = fig.canvas.get_renderer()
+#     #print(rend)
+#     lbb = leg.get_window_extent(renderer=rend)
+#     #l_coords = leg.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+#     #xlbl_coords = ax.xaxis.get_window_extent(renderer=rend)#l_coords = leg.get_frame().get_bbox().bounds
+#     xlbl = ax.xaxis.get_label()
+#     ylbl = ax.yaxis.get_label()
+#     xlbb = xlbl.get_window_extent()
+#     ylbb = ylbl.get_window_extent()
+#     tbb = tobj.get_window_extent()
 
-    plt.close()
+#     plt.close()
 
-    #fig.savefig(fname)
-    return ("graph_" + str(n), X1s, X2s, titlestr, label_to_corr_map)#lbb, xlbb, ylbb, tbb)
+#     #fig.savefig(fname)
+#     return ("graph_" + str(n), X1s, X2s, titlestr, label_to_corr_map)#lbb, xlbb, ylbb, tbb)
 
 
 def writeOutput(numGraphs):
@@ -208,8 +212,8 @@ def writeOutput(numGraphs):
     hits = 0
     for i in range(0,numGraphs):
         leg_display_str = ""
-        name,x1s,x2s,tstr,label_to_corr_map = create_multiData(i, choice(posSNs), "train", "random", "multi", "solid")
-        iname = name + ".jpg"
+        name,x1s,x2s,tstr,label_to_corr_map = create_multiData(i, choice(posSNs), "train", "random", "multi", "solid", 'pt')
+        iname = name + ".png"
         display_string = "images/" + iname + ", x axis: " + x1s + ", y axis: " + x2s + ", title: " + tstr
         leg_set = set()
         for key in label_to_corr_map:
@@ -254,5 +258,57 @@ def writeOutput(numGraphs):
         writer.writerows(ground_truth)
     f.close()
 
-writeOutput(50)
 
+def test_series_classification(numGraphs):
+    posSNs = [1,2,3]
+    ks = []
+    sNs = []
+    for i in range(numGraphs):
+        sN = choice(posSNs)
+        print(sN)
+        sNs.append(sN)
+        name,x1s,x2s,tstr,label_to_corr_map = create_multiData(i, sN, "train", "random", "multi", "solid", 'pt')
+        iname = name + ".png"
+        print(iname)
+        img = cv2.imread("images/" + iname)
+        img = sat_thresh_filter(img,40)
+        ks.append(elbowM(img)-1)
+        im = Image.fromarray(img)
+        im.save('images/thresh_ref'+str(i)+'.png')
+    score = 0
+    print(ks)
+    print(sNs)
+    for i in range(len(ks)):
+        if ks[i] == sNs[i]:
+            score +=1
+    print(score/len(ks))
+
+def v2():
+    score = 0
+    ctr = 0
+    fileList = glob.glob("1000_series_filtered/train/1/1_*.png")
+    for graph in fileList:
+        if ctr == 50:
+            print('50 done')
+        ctr+=1
+        img = cv2.imread(graph)
+        if num_diff_cols(img) == 2:
+            score+=1
+    print('done 1')
+    fileList = glob.glob("1000_series_filtered/train/2/2_*.png")
+    for graph in fileList:
+        img = cv2.imread(graph)
+        if num_diff_cols(img) == 3:
+            score+=1
+    print('done 2')
+    fileList = glob.glob("1000_series_filtered/train/3/3_*.png")
+    for graph in fileList:
+        img = cv2.imread(graph)
+        if num_diff_cols(img) == 4:
+            score+=1
+    print('done 3')
+    print(score/1000)
+
+#writeOutput(10)
+#test_series_classification(50)
+#v2()

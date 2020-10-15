@@ -38,8 +38,7 @@ def permutation(lst):
        # element 
        for p in permutation(remLst): 
            l.append([m] + p) 
-    return l 
-
+    return l
 
 def match_series(col_to_seg_map,offset,leg_text_boxes,img_shape):
     '''
@@ -211,8 +210,11 @@ def run(img):
     col_to_seg_map = {}
     segImg = segmentImg(img)
     segLeg = None
-    ocr = OCR(img,segImg,assign_labels(show_inference(detection_model, img)))
-    text_dict = ocr.crop()
+    #jpgimg = Image.open(img).convert('RGB')
+    #newimgp = img[:len(img)-3] + 'jpg' # convert png to jpg
+    #jpgimg.save(newimgp)
+    ocr = OCR(img,segImg,{},4)#assign_labels(show_inference(detection_model, newimgp)))
+    #text_dict = ocr.crop()
     #print(ocr.match_leg_img)
     #if ocr.match_leg_img:
         #print('yes')
@@ -226,11 +228,18 @@ def run(img):
     image_holder = []
     print("seg len:" + str(len(segImg)))
     for i,(res,col) in enumerate(segImg):
-        fname = "pipeline_batch/" + str(i) + ".jpg"
+        fname = "pipeline_batch/" + str(i) + ".png"
         plt.imsave(fname, res)
         cat = predictCategory(fname, "models/correlation/graph_class_model_v3.h5", ['negative', 'neutral', 'positive'])
         # variable = pytesseract.image_to_string(Image.open(fname))
-        col = find_nearest_col(col,posRGB)
+        colstr = "["
+        for chanel in col:
+            if colstr == "[":
+                colstr = colstr + str(chanel)
+            else:
+                colstr = colstr + ", " + str(chanel)
+        
+        col = colstr + "] " + find_nearest_col(col,posRGB)
         '''
         for each segmented thing, find box closest to an exisintg pixel
         '''
@@ -292,24 +301,25 @@ def run(img):
     # color_list.sort(reverse=True)
     # print(color_list)
     print(col_to_cat_map)
-    return (rtn,text_dict)
+    return (rtn,ocr)
 
 
 def process_img(img_path):
-    result,text_dict = run(img_path)
+    result,OCR = run(img_path)
+    text_dict = {'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
     display_string = img_path
     for elem in text_dict:
-        if elem != 'legend':
-            display_string = display_string + ", " + elem + ":"
-            for obj in text_dict[elem]:
-                display_string = display_string + " " + obj
+        if elem != 'legend' and text_dict[elem] is not None:
+            display_string = display_string + ", " + elem + ": " + text_dict[elem]
+            # for obj in text_dict[elem]:
+            #     display_string = display_string + " " + obj #removed space
     corr_set = set()
-    for series in result:
-        corr_set.add(series + ": " + result[series])
+    # for series in result:
+    #     corr_set.add(series + ": " + result[series])
         #display_string = display_string + ", " + series + ": " + result[series]
     
     return (display_string, corr_set)
 
-strrrr, setttt = process_img("images/OI_5.jpg")#'images_test/test.jpg'))
+strrrr, setttt = process_img('./images_test/OI_7.jpg')
 print(strrrr)
 print(setttt)

@@ -2,6 +2,7 @@
 # import necessary files
 from create_graph import *
 from graph_classification import *
+from series_classification import *
 from clean import *
 from process_instF import *
 from seg_img import *
@@ -29,10 +30,10 @@ if(args.function == "create_training_data"):
     executeOrder66(args.instF, cwd)
 elif(args.function == "graph_classification"):
     graph_classification(cwd,1)
+elif(args.function == "series_classification"):
+    series_classification(cwd,1)
 elif(args.function == "clean"):
     clean(cwd)
-elif(args.function == "seg_img"):
-    saveGraphs()
 elif(args.function == "cleanSeries"):
     cleanSeries(cwd)
 else:
