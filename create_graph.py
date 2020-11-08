@@ -53,8 +53,9 @@ def genData(dataType):
         b = math.sin(phi)
         c = math.sin(phi)
         d = math.cos(phi)
+        intercept = choice(sign) * randint(0,10) * random()
         X1 = (a * Y1) + (b * Y2)
-        X2 = (c * Y1) + (d * Y2)
+        X2 = (c * Y1) + (d * Y2) + intercept
     
     # calculate correlation
     corr = corr, _ = spearmanr(X1, X2) # spearman correlation
@@ -164,12 +165,22 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
         lbl = get_random_string(randint(3,12))
         label_to_corr_map[lbl] = correlation[colArr[i]]
         if GT == 'line':
-            plt.plot(X1, X2, linestyle=LSarr[i], label=lbl) # color=colArr[i], 
+            if model == 'g':
+                plt.plot(X1, X2, linestyle=LSarr[i], label=lbl, color=colArr[i])     
+            else:
+                plt.plot(X1, X2, linestyle=LSarr[i], label=lbl) # color=colArr[i], 
         elif GT == 'scatter':
-            ax.scatter(X1, X2, label=lbl) # color=colArr[i], 
+            if model == 'g':
+                ax.scatter(X1, X2, label=lbl, color=colArr[i])     
+            else:
+                ax.scatter(X1, X2, label=lbl) # color=colArr[i], 
         elif GT == 'bar':
-            w = 0.8 #* len(varArr)
-            ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl) # color=colArr[i], 
+            if model == 'g':
+                w = 0.8 #* len(varArr)
+                ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl, color=colArr[i])
+            else:
+                w = 0.8 #* len(varArr)
+                ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl) # color=colArr[i], 
         else:
             raise ValueError('graph type not recognized')
 

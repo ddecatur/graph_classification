@@ -11,8 +11,8 @@ import csv # dont need anymore
 import glob
 import cv2
 
-posRGB = {(255,0,0):'r', (0,128,0):'g', (0,0,255):'b', (255,165,0):'o', (128,128,128):'gr'}
-colorMap = {'r':'red', 'g':'green', 'b':'blue', 'o':'orange', 'gr':'gray'}
+posRGB = {(255,0,0):'red', (0,128,0):'green', (0,0,255):'blue', (255,165,0):'orange', (255,0,255):'purple', (255,255,0):'yellow'}#, (128,128,128):'gray'}
+#colorMap = {'r':'red', 'g':'green', 'b':'blue', 'o':'orange', 'gr':'gray'}
 
 def dist(p1,p2):
     return math.sqrt(((p1[0]-p2[0])**2) + ((p1[1]-p2[1])**2))
@@ -230,7 +230,7 @@ def run(img):
     for i,(res,col) in enumerate(segImg):
         fname = "pipeline_batch/" + str(i) + ".png"
         plt.imsave(fname, res)
-        cat = predictCategory(fname, "models/correlation/graph_class_model_v3.h5", ['negative', 'neutral', 'positive'])
+        cat = predictCategory(fname, "models/correlation/graph_class_model.h5", ['negative', 'neutral', 'positive']) #"models/correlation/graph_class_model_v3.h5"
         # variable = pytesseract.image_to_string(Image.open(fname))
         colstr = "["
         for chanel in col:
@@ -239,7 +239,7 @@ def run(img):
             else:
                 colstr = colstr + ", " + str(chanel)
         
-        col = colstr + "] " + find_nearest_col(col,posRGB)
+        col = find_nearest_col(col,posRGB)#colstr + "] " + find_nearest_col(col,posRGB)
         '''
         for each segmented thing, find box closest to an exisintg pixel
         '''
@@ -259,7 +259,11 @@ def run(img):
             # self.seg[tuple(col)] = res
             # color_list.append(match_series(np.asarray(crp_res), ocr.crop_amount, ocr.leg_text_boxes)) # added the crop amount here to be able to recover the coordinates of the text boxes
         
-        col_to_cat_map[col] = cat
+        # rename duplicate colors
+        i = 0
+        if col not in col_to_cat_map:
+            col_to_cat_map[col] = set()
+        col_to_cat_map[col].add(cat)
     if ocr.leg_box != None:
         col_to_series_map = match_series(col_to_seg_map, ocr.crop_amount, ocr.leg_text_boxes, img_shape)
         for key in col_to_series_map:
@@ -300,7 +304,7 @@ def run(img):
     #         color_list.append(avg_height(res))
     # color_list.sort(reverse=True)
     # print(color_list)
-    print(col_to_cat_map)
+    #print(col_to_cat_map)
     return (rtn,ocr)
 
 
@@ -314,12 +318,13 @@ def process_img(img_path):
             # for obj in text_dict[elem]:
             #     display_string = display_string + " " + obj #removed space
     corr_set = set()
-    # for series in result:
-    #     corr_set.add(series + ": " + result[series])
-        #display_string = display_string + ", " + series + ": " + result[series]
+    for series in result:
+        for elem in result[series]:
+            corr_set.add(series + ": " + elem)
+            display_string = display_string + ", " + series + ": " + elem
     
     return (display_string, corr_set)
 
-strrrr, setttt = process_img('./images_test/OI_7.jpg')
+strrrr, setttt = process_img('./exp_testing/R/R16.png')
 print(strrrr)
 print(setttt)

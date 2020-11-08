@@ -291,8 +291,8 @@ def hsvRange (rgbList):
         rangeList.append(find_ranges(h,s,v))
         
     total = zip(rangeList, rgbList)
-    for item in total:
-        print (item)
+    # for item in total:
+    #     print (item)
     return rangeList
 
 def hsv_col_str():

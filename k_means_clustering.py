@@ -137,7 +137,7 @@ def elbowM(arr):
   kn = KneeLocator(x, y, S=3.0, online=True, curve='convex', direction='decreasing')
   #print(kn.y_normalized[kn.knee])
   #print(kn.y_normalized[kn.knee-1])
-  if kn.y_normalized[kn.knee-1] < 0.99:
+  if kn.y_normalized[kn.knee-1] < 0.985:#used to be 99
     ret = kn.knee+1
   else:
     ret = kn.knee
