@@ -1,3 +1,10 @@
+1) Code that trains a model as well as the extra infrastructure required to extract the structed correlation data from images of graphs
+
+
+
+
+
+#### Old info disregard ####
 To generate graphs:
 Call execute_function.py with "create_training_data" and update instructions.yaml accordingly to give the desired instructions. Alternitively, you can call with another argument which is a different .yaml file containing instructions on how to generate graphs.
 

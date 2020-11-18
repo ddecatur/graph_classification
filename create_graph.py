@@ -6,12 +6,9 @@ from numpy.random import randint
 from numpy.random import random
 from numpy.random import randn
 from numpy.random import choice
-from numpy.random import seed
-from numpy import cov
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 from seg_img import *
-import sys
 import math
 import os
 import csv
@@ -56,7 +53,10 @@ def genData(dataType):
         intercept = choice(sign) * randint(0,10) * random()
         X1 = (a * Y1) + (b * Y2)
         X2 = (c * Y1) + (d * Y2) + intercept
-    
+    else:
+        print('error: gen_data -- no  graph type given')
+        return
+
     # calculate correlation
     corr = corr, _ = spearmanr(X1, X2) # spearman correlation
     return (X1,X2,corr)
@@ -85,16 +85,12 @@ def get_random_string(length):
     res = ''.join(randomchoice(letters) for i in range(length))
     return res
 
-# # create multi data graph
+# create multi data graph
 def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, verbose=0):
     
     #determine variables
     STcopy = seriesType
     possSeries = ['line', 'scatter', 'bar']
-    #sN = 3
-    # if sN == 1:
-    #     possSeries.append('bar')
-    #possSeries = ['bar']
     varArr = np.empty (sN, tuple)
     for i in range (0,sN):
         if STcopy == 'random':
@@ -138,19 +134,12 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
     # plot
     label_to_corr_map = {}
     correlation = {}
-    corr = list()
     fig, ax = plt.subplots()
     plot_options = plt.style.available
     if 'grayscale' in plot_options:
         plot_options.remove('grayscale')
     if 'dark_background' in plot_options:
         plot_options.remove('dark_background')
-    # if 'dark_background' in plot_options:
-    #     plot_options.remove('dark_background')
-    # if train_val == 'train':
-    #     plt.style.use('classic')
-    # else:
-    #     plt.style.use('ggplot')
     plt.style.use('default')
     style = choice(plot_options)
     plt.style.use(style)
@@ -176,10 +165,10 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
                 ax.scatter(X1, X2, label=lbl) # color=colArr[i], 
         elif GT == 'bar':
             if model == 'g':
-                w = 0.8 #* len(varArr)
+                w = 0.8
                 ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl, color=colArr[i])
             else:
-                w = 0.8 #* len(varArr)
+                w = 0.8
                 ax.bar((len(varArr)*X1)+(w*i), X2, width=w, align='center', label=lbl) # color=colArr[i], 
         else:
             raise ValueError('graph type not recognized')
@@ -231,107 +220,6 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
     
     return ("line_graph" + str(n), float(corrph), "placeholder")
 
-
-# create the training data
-def create_training_data(size, seriesNum, graphType, color, dataStyle, v, directory):
-    cwd=os.getcwd()
-    if(cwd!=directory):
-        print("error: create_data called from wrong directory")
-    else:
-        # create the appropriate training, validation, and correlation directories
-        # ----------------------------------------
-
-        # create graphs_filtered
-        path = "./graphs_filtered"
-        try:
-            os.mkdir(path)
-        except OSError:
-            print ("Warning: Creation of the directory %s failed, might already exist" % path)
-
-        # create training and validation directories
-        correlations = ["positive", "negative", "neutral"]
-        for correlation in correlations:
-            train_path = "./graphs_filtered/train/" + correlation
-            try:
-                os.makedirs(train_path)
-            except OSError:
-                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
-            train_path = "./graphs_filtered/validation/" + correlation
-            try:
-                os.makedirs(train_path)
-            except OSError:
-                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
-
-        # ----------------------------------------
-
-
-
-        # initialize the list (array)
-        graphs = list()
-
-        # match tuples
-        (train_gt, val_gt) = graphType
-        (train_col, val_col) = color
-        (train_ds, val_ds) = dataStyle
-        
-        
-        if seriesNum=='multi':
-            sNop = ["1", "2", "3"]
-            for i in range (0,size):
-                sNopC = int(choice(sNop))
-                create_multiData(i+1, sNopC, "train", train_gt, train_col, train_ds, 'g', v)
-            for i in range (0,size):
-                sNopC = int(choice(sNop))
-                create_multiData(i+1, sNopC, "validation", val_gt, val_col, val_ds, 'g', v)
-
-        else:
-            #test = [train_gt, val_gt, train_col, val_col, train_ds, val_ds]
-            dt = ['scatter','line','bar'] # list of possible data types
-            errorMsg = False
-
-            # Training Data
-            orig_gt = train_gt
-            graphs.append(("Title", "Correlation", "Rounded Correlation"))
-            for i in range (0,size):
-                if orig_gt == "random":
-                    train_gt = choice(dt)
-                if train_gt == "scatter":
-                    graphs.append(create_scatter_graph(i+1, "train", train_col, v))
-                elif train_gt == "line":
-                    graphs.append(create_line_graph(i+1, "train", train_col, train_ds, v))
-                elif train_gt == "bar":
-                    graphs.append(create_bar_graph(i+1, "train", train_col, train_ds, v))
-                else:
-                    errorMsg = True
-            
-            # Validation Data
-            orig_gt = val_gt
-            for i in range (0, size):
-                # choose graph type if random
-                if orig_gt == "random":
-                    val_gt = choice(dt)
-                if val_gt == "scatter":
-                    graphs.append(create_scatter_graph(i+1, "validation", val_col, v))
-                elif val_gt == "line":
-                    graphs.append(create_line_graph(i+1, "validation", val_col, val_ds, v))
-                elif val_gt == "bar":
-                    graphs.append(create_bar_graph(i+1, "validation", val_col, val_ds, v))
-                else:
-                    errorMsg = True
-            if errorMsg == True:
-                print("error: create_data called with wrong graphType (validation)")    
-    
-        # create CSV file with graph names and correlations
-        with open('graph_info.csv', 'w') as f:
-            writer = csv.writer(f, delimiter=',')
-            writer.writerows(graphs)
-        f.close()
-
-        # print success to console
-        print("create_training_data: successful")
-
-        # return the current path (this will be used for the image classication program)
-        return os.getcwd()
 
 def train_series_class(size, sN, dataStyle, directory):
     cwd=os.getcwd()

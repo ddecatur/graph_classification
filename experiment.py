@@ -4,7 +4,6 @@ from series_classification import series_classification
 from clean import *
 from process_instF import *
 from seg_img import *
-import OpenSSL
 import argparse
 import datetime
 
@@ -27,9 +26,6 @@ i=0
 for i in range(0,n): # run the classiciation model n times for the given color setup
     start = datetime.datetime.now()
     executeOrder66(args.instF,cwd) # create the training data from the instructions file
-    # if seg:
-    #     saveGraphs()
-    #     cleanReg(cwd)
     if GP == 'series_train':
         series_classification(cwd, i)
         cleanSeries(cwd)

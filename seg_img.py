@@ -1,12 +1,7 @@
 import cv2
-import matplotlib.pyplot as plt
-import matplotlib.colors as pltcol
 import numpy as np
-import os
 from PIL import Image
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
-import colorsys
 from k_means_clustering import *
 import math
 
@@ -59,7 +54,7 @@ def sharpen(img):
     kernal_h = np.array([[-1,-1,-1], 
                        [-1, 9,-1],
                        [-1,-1,-1]])
-    return cv2.filter2D(img, -1, kernal)
+    return cv2.filter2D(img, -1, kernal_h)
 
 def eximg(img):
     for i in range(img.shape[0]):
@@ -113,20 +108,11 @@ def max_sat_filter(img,n):
             max_col = tuple(img[i][j])
             h,s,v = max_col
             if s < 240:
-
             #if tuple(img[i][j]) != (0,0,255): # to leave white tiles white
                 for ii in range(-n,n):
                     for jj in range(-n,n):
                         if i+ii in range(img.shape[0]) and j+jj in range(img.shape[1]):
-                            #print("checking max")
-                            #print(max_col)
-                            #print(img[i+ii,j+jj])
-                            #oldmax = max_col
                             max_col = sat_max(max_col, tuple(img[i+ii,j+jj]))
-                            # if oldmax != max_col:
-                            #     print("change!")
-                            #     print(oldmax)
-                            #     print(max_col)
             new_img[i][j] = max_col
     new_img = new_img.astype(np.uint8)
     new_img = cv2.cvtColor(new_img, cv2.COLOR_HSV2RGB)
@@ -186,7 +172,7 @@ def isGrayish(color):
         return False
 
 # type: img path --> list of color ranges
-def idColor(image):#'./testttttt.png'):
+def idColor(image):
     rangeList = list()
     
     ogImg = image
@@ -205,14 +191,8 @@ def idColor(image):#'./testttttt.png'):
     # determine which colors to segment out
     colList = list()
     maxCol = max(hist) # identify the background color as the most common color so it can be removed
-    minCol = min(hist)
-    #print(pltcol.get_named_colors_mapping())
     for (percent, color) in zip(hist, clt.cluster_centers_):
-        nearcol=find_nearest_col_rgb(color,posRGB)
-        #print('percent,near,color,max: ')
-        #print(percent, nearcol, color, maxCol)
-        if (percent != maxCol and isGrayish(color)==False): #percent != minCol):#nearcol!=(0,0,0)) and nearcol!=(255,255,255):# and nearcol!='white'):# and col_dist(color,(0,0,0))>60):# and percent > 0.02): # and percent != minCol):
-            #colList.append(nearcol)
+        if (percent != maxCol and isGrayish(color)==False):
             colList.append(color.astype("uint8").tolist())
     return colList
 
@@ -289,16 +269,11 @@ def hsvRange (rgbList):
     for (r,g,b) in rgbList:
         (h,s,v) = rgb_hsv(r,g,b)
         rangeList.append(find_ranges(h,s,v))
-        
-    total = zip(rangeList, rgbList)
-    # for item in total:
-    #     print (item)
+
     return rangeList
 
-def hsv_col_str():
-    return 2
 
-def segmentImg(img='./testttttt.png', fixed_k=None):
+def segmentImg(img, fixed_k=None):
     '''
     Givn an image path, segment out colors from that image
     '''
@@ -320,90 +295,14 @@ def segmentImg(img='./testttttt.png', fixed_k=None):
 
     # convert to hsv image type
     hsv_graph = cv2.cvtColor(graph, cv2.COLOR_RGB2HSV)
-    #print(hsv_graph)
     results = list()
     for i,rngSet in enumerate(colRangeList):
         masks = list()
         for (ll,ul) in rngSet:
             masks.append(cv2.inRange(hsv_graph, ll, ul))
-        #mask = cv2.inRange(hsv_graph, ll, ul)
         maskFinal = masks[0]
-        # for mask in masks:
-        #     if maskFinal == None:
-        #         maskFinal = mask
-        #     else:
-        #         maskFinal = maskFinal + mask
         for j in range(1,len(masks)):
             maskFinal = maskFinal + masks[j]
         results.append((cv2.bitwise_and(graph, graph, mask=maskFinal), colList[i]))
 
-    # show image
-    #plt.subplot(1, len(results)+1, 1)
-    #plt.imshow(mask, cmap="gray")
-    #i=2
-    #for res in results:
-    #    plt.subplot(1, len(results)+1, i)
-    #    plt.imshow(res)
-    #    i=i+1
-    #plt.show()
-
     return results
-
-# # Function to save the graphs
-# def saveGraphs(rootDir='graphs_filtered'):
-  
-#     for count, dir_name1 in enumerate(os.listdir(rootDir)): # options: train, validation
-#         if dir_name1 != '.DS_Store':
-#             for count, dir_name2 in enumerate(os.listdir(rootDir+'/'+dir_name1)): # options: negative, neutral, positive
-#                 if dir_name2 != '.DS_Store':
-#                     for count, filename in enumerate(os.listdir(rootDir+'/'+dir_name1+'/'+dir_name2)): # options: actual image names
-#                         segImg = segmentImg(rootDir+'/'+dir_name1+'/'+dir_name2+'/'+filename)
-#                         i=0
-#                         # col_corr = 23#det_corr(filename)
-#                         # for (res,col) in segImg:
-#                         #     fname = rootDir+'/'+dir_name1+'/'+ col_corr[col] +'/seg_'+str(i)+'_'+filename #dir_name2+'/seg_'+str(i)+'_'+filename
-#                         #     plt.imsave(fname, res)
-#                         #     i=i+1
-
-def tests():
-    img = './graphs_filtered/train/negative/reg_bar_graph3.png'
-    graph = cv2.imread(img)
-    graph = cv2.cvtColor(graph, cv2.COLOR_BGR2RGB)
-    print(hsvRange(idColor(graph)))
-#saveGraphs()
-#tests()
-#segmentImg()
-
-#descritize(cv2.imread('./images/OI_1.jpg'))
-# simg = np.array([
-#                 [[255,255,255],[128,128,255],[128,128,255],[0,0,255],[0,0,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]], 
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[128,128,255],[128,128,255],[0,0,255],[0,0,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]],
-#                 [[255,255,255],[128,128,128],[255,255,255],[255,0,0],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255],[255,255,255]]
-#                 ])#cv2.imread('./images/OI_1.jpg')
-
-#realimg = np.array(cv2.imread('./images_test/OI_1.png'))
-# smarr = np.array(
-#     [
-#         [[255,255,255],[255,255,255],[255,255,255]], 
-#         [[255,255,255],[128,128,255],[0,0,255]],
-#         [[255,255,255],[255,255,255],[255,255,255]],
-#     ]
-# )
-# smarr = np.uint8(smarr)
-# simg = np.uint8(simg)
-# fig, ax = plt.subplots(1, 2, figsize=(16, 6),
-#                        subplot_kw=dict(xticks=[], yticks=[]))
-# fig.subplots_adjust(wspace=0.05)
-# ax[0].imshow(cv2.cvtColor(realimg, cv2.COLOR_BGR2RGB))
-# ax[0].set_title('Original Image', size=16)
-# simg_sharpened = orange_to_red(sat_thresh_filter(realimg,30))#,4)
-# ax[1].imshow(simg_sharpened)
-# ax[1].set_title('Saturated Image', size=16)
-# plt.show()

@@ -6,11 +6,8 @@ from series_classification import *
 from clean import *
 from process_instF import *
 from seg_img import *
-import sys
-import csv
 import argparse
 import os
-import yaml
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Parse Command Line Arguments')

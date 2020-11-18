@@ -29,13 +29,10 @@ def clean(directory):
             dsPath = dirPath + "/.DS_Store"
             try:
                 os.remove(dsPath)
-                #print(dsPath)
-                #print("success on .DS_Store removal from %s" % dirPath)
             except:
                 print("Warning: error removing .DS_Store file, might not exist (this is ok)")
             try:
                 os.rmdir(dirPath)
-                #print("success on correlation dir %s" % dirPath)
             except OSError:
                 print ("Deletion of the directory %s failed" % dirPath)
 
@@ -45,13 +42,10 @@ def clean(directory):
             dsPath2 = dirPath2 + "/.DS_Store"
             try:
                 os.remove(dsPath2)
-                #print(dsPath)
-                #print("success on .DS_Store removal from %s" % dirPath2)
             except:
                 print("Warning: error removing .DS_Store file, might not exist (this is ok)")
             try:
                 os.rmdir(dirPath2)
-                #print("success on dir %s" % dirPath2)
             except OSError:
                 print ("Deletion of the directory %s failed" % dirPath2)
 
@@ -60,13 +54,10 @@ def clean(directory):
         dsPath3 = path + "/.DS_Store"
         try:
             os.remove(dsPath3)
-            #print(dsPath2)
-            #print("success on .DS_Store removal from %s" % path)
         except:
             print("Warning: error removing .DS_Store file, might not exist (this is ok)")
         try:
             os.rmdir(path)
-            #print("success on dir %s" % path)
         except OSError:
             print ("Deletion of the directory %s failed" % path)
 
@@ -105,13 +96,10 @@ def cleanSeries(directory):
             dsPath = dirPath + "/.DS_Store"
             try:
                 os.remove(dsPath)
-                #print(dsPath)
-                #print("success on .DS_Store removal from %s" % dirPath)
             except:
                 print("Warning: error removing .DS_Store file, might not exist (this is ok)")
             try:
                 os.rmdir(dirPath)
-                #print("success on correlation dir %s" % dirPath)
             except OSError:
                 print ("Deletion of the directory %s failed" % dirPath)
 
@@ -121,13 +109,10 @@ def cleanSeries(directory):
             dsPath2 = dirPath2 + "/.DS_Store"
             try:
                 os.remove(dsPath2)
-                #print(dsPath)
-                #print("success on .DS_Store removal from %s" % dirPath2)
             except:
                 print("Warning: error removing .DS_Store file, might not exist (this is ok)")
             try:
                 os.rmdir(dirPath2)
-                #print("success on dir %s" % dirPath2)
             except OSError:
                 print ("Deletion of the directory %s failed" % dirPath2)
 
@@ -136,13 +121,10 @@ def cleanSeries(directory):
         dsPath3 = path + "/.DS_Store"
         try:
             os.remove(dsPath3)
-            #print(dsPath2)
-            #print("success on .DS_Store removal from %s" % path)
         except:
             print("Warning: error removing .DS_Store file, might not exist (this is ok)")
         try:
             os.rmdir(path)
-            #print("success on dir %s" % path)
         except OSError:
             print ("Deletion of the directory %s failed" % path)
 

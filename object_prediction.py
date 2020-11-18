@@ -16,10 +16,6 @@ from IPython.display import display
 from res_object_detection.utils import ops as utils_ops
 from res_object_detection.utils import label_map_util
 
-# from __future__ import absolute_import
-# from __future__ import division
-# from __future__ import print_function
-
 import abc
 # Set headless-friendly backend.
 import matplotlib; matplotlib.use('Agg')  # pylint: disable=multiple-statements

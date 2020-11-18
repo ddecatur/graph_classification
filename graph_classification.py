@@ -4,11 +4,8 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
 import os
-import numpy as np
 import matplotlib.pyplot as plt
-import sys
 import csv
 from datetime import datetime
 
@@ -60,20 +57,6 @@ def graph_classification (path_to_data, n):
                                                                     target_size=(IMG_HEIGHT, IMG_WIDTH),
                                                                     class_mode='categorical')
 
-        # sample
-        sample_training_images, _ = next(train_data_gen)
-
-        # following function is diagnostic and not necessary
-        # This function will plot images in the form of a grid with 1 row and 5 columns where images are placed in each column.
-        def plotImages(images_arr):
-            fig, axes = plt.subplots(1, 5, figsize=(20,20))
-            axes = axes.flatten()
-            for img, ax in zip( images_arr, axes):
-                ax.imshow(img)
-                ax.axis('off')
-            plt.tight_layout()
-            plt.show()
-        #plotImages(sample_training_images[:5])
 
         # create the model
         model = Sequential([

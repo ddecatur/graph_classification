@@ -11,12 +11,7 @@ from numpy import cov
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 from create_graph import *
-import sys
-import math
-import os
-import re
 import csv
-import math
 import glob
 from pipeline import *
 from seg_img import sat_thresh_filter
@@ -167,30 +162,30 @@ def test_outside_data():
         gtLabels = yaml.load(f, Loader=yaml.FullLoader)
     M = gtLabels.get('M')
     R = gtLabels.get('R')
-    # fileList = glob.glob("exp_testing/M/M*")
-    # ctr = 0
-    # for imagePath in fileList:
-    #     ctr += 1
-    #     s = imagePath.find('/M/M') + 3
-    #     e = imagePath.find('.', s)
-    #     name = imagePath[s:e]
-    #     gtCorr = set(M[name].keys())
-    #     testAxis,testCorr = process_img(imagePath)
-    #     print(gtCorr)
-    #     print(testCorr)
-    #     if gtCorr == testCorr:
-    #         mScore += 1
-    #     else:
-    #         with open('Mtestinginfo.csv', 'a') as f:
-    #             writer = csv.writer(f, delimiter=',')
-    #             writer.writerow((imagePath, gtCorr, testCorr))
-    #         f.close()
-    #     for elem1 in gtCorr:
-    #         for elem2 in testCorr:
-    #             if elem1 == elem2:
-    #                 mAScore += (1/len(gtCorr))
-    # mScore = mScore/ctr
-    # mAScore = mAScore/ctr
+    fileList = glob.glob("exp_testing/M/M*")
+    ctr = 0
+    for imagePath in fileList:
+        ctr += 1
+        s = imagePath.find('/M/M') + 3
+        e = imagePath.find('.', s)
+        name = imagePath[s:e]
+        gtCorr = set(M[name].keys())
+        testAxis,testCorr = process_img(imagePath)
+        print(gtCorr)
+        print(testCorr)
+        if gtCorr == testCorr:
+            mScore += 1
+        else:
+            with open('Mtestinginfo.csv', 'a') as f:
+                writer = csv.writer(f, delimiter=',')
+                writer.writerow((imagePath, gtCorr, testCorr))
+            f.close()
+        for elem1 in gtCorr:
+            for elem2 in testCorr:
+                if elem1 == elem2:
+                    mAScore += (1/max(len(gtCorr),len(testCorr)))
+    mScore = mScore/ctr
+    mAScore = mAScore/ctr
     fileList = glob.glob("exp_testing/R/R*")
     ctr = 0
     for imagePath in fileList:
@@ -223,6 +218,3 @@ def test_outside_data():
     print('Total Adjusted: ' + str((mAScore+rAScore)/2))
 
 test_outside_data()
-#writeOutput(10)
-#test_series_classification(50)
-#v2()
