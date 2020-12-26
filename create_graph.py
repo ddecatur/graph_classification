@@ -86,7 +86,7 @@ def get_random_string(length):
     return res
 
 # create multi data graph
-def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, verbose=0):
+def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, pstyle='default', outputDir='graphs_filtered', outputDir2='images', verbose=0):
     
     #determine variables
     STcopy = seriesType
@@ -141,8 +141,9 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
     if 'dark_background' in plot_options:
         plot_options.remove('dark_background')
     plt.style.use('default')
-    style = choice(plot_options)
-    plt.style.use(style)
+    if pstyle == 'multi':
+        style = choice(plot_options)
+        plt.style.use(style)
     for i,var in enumerate(varArr):
         ((X1,X2,corrph),GT) = var
         if corrph >= 0.4:
@@ -197,7 +198,7 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
             closeCol = find_nearest_col(col,posRGB)
             if closeCol in correlation:
                 corrstr = correlation[closeCol]
-                fname = "graphs_filtered/" + train_val + "/" + corrstr + "/" + "seg_" + corrstr + "_" + closeCol + str(i) + "_" + seriesType + "_graph" + str(n) + ".png" # changed to jpg
+                fname = outputDir + "/" + train_val + "/" + corrstr + "/" + "seg_" + corrstr + "_" + closeCol + str(i) + "_" + seriesType + "_graph" + str(n) + ".png" # changed to jpg
                 plt.imsave(fname,img)
             else:
                 print('closest color not found')
@@ -211,17 +212,84 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, ver
         im = Image.fromarray(img)
         im.save(fname)
         plt.close()
+    # elif model == 'exp1':
+    #     fname = 'exp1/'+ str(sN) + '/' + str(sN) + "_graph" + str(n) + ".png"
+    #     fig.savefig(fname)
+    #     if preprocess == True:
+    #         img = cv2.imread(fname)
+    #         img = sat_thresh_filter(img,30)
+    #         im = Image.fromarray(img)
+    #         im.save(fname)
+    #     plt.close()
+
     else:
         # name the given graph
-        fname = "images/" + "graph_" + str(n) + ".png"
+        fname = outputDir2 + "/" + "graph_" + str(n) + ".png"
         fig.savefig(fname)
         plt.close()
-        return ("graph_" + str(n), X1s, X2s, titlestr, label_to_corr_map)
+        if model == "pt":
+            return ("graph_" + str(n), X1s, X2s, titlestr, label_to_corr_map)
+        else:
+            return fname
     
     return ("line_graph" + str(n), float(corrph), "placeholder")
 
 
-def train_series_class(size, sN, dataStyle, directory):
+def create_filtered_dirs(dirname="graphs_filtered"):
+    # create the appropriate training, validation, and correlation directories
+        # ----------------------------------------
+
+        # create graphs_filtered
+        path = "./" + dirname #"./graphs_filtered"
+        try:
+            os.mkdir(path)
+        except OSError:
+            print ("Warning: Creation of the directory %s failed, might already exist" % path)
+
+        # create training and validation directories
+        correlations = ["positive", "negative", "neutral"]
+        for correlation in correlations:
+            train_path = "./" + dirname + "/train/" + correlation
+            try:
+                os.makedirs(train_path)
+            except OSError:
+                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
+            train_path = "./" + dirname + "/validation/" + correlation
+            try:
+                os.makedirs(train_path)
+            except OSError:
+                print ("Warning: Creation of the directory %s failed, might exist already" % train_path)
+
+        # ----------------------------------------
+
+def create_training_data(size, graphType, color, dataStyle, outputDir="graphs_filtered", v=False):
+    
+    # create output directory
+    create_filtered_dirs(outputDir)
+
+    # match tuples
+    (train_gt, val_gt) = graphType
+    (train_col, val_col) = color
+    (train_ds, val_ds) = dataStyle
+    
+    sNop = ["1", "2", "3"]
+    for i in range (0,size):
+        sNopC = int(choice(sNop))
+        create_multiData(i+1, sNopC, "train", train_gt, train_col, train_ds, 'g', v)
+    for i in range (0,size): # validate with less data
+        sNopC = int(choice(sNop))
+        create_multiData(i+1, sNopC, "validation", val_gt, val_col, val_ds, 'g', v)
+
+    # print success to console
+    print("create_training_data: complete")
+
+    # return the current path (this will be used for the image classication program)
+    return os.getcwd()
+
+
+
+
+def train_series_class(size, dataStyle, directory):
     cwd=os.getcwd()
     if(cwd!=directory):
         print("error: create_data called from wrong directory")

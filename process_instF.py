@@ -11,7 +11,7 @@ def executeOrder66(instrF, directory):
     (t1,t2) = instr.get('graphType').split(',')
     (c1,c2) = instr.get('color').split(',')
     (s1,s2) = instr.get('dataStyle').split(',')
-    sN = instr.get('seriesNum')
+    #sN = instr.get('seriesNum')
     GP = instr.get('genPurpose')
     size = instr.get('size')
     bools = [c1,c2,s1,s2]
@@ -23,8 +23,8 @@ def executeOrder66(instrF, directory):
 
     # create the training data
     if GP == 'series_train':
-        train_series_class(size, sN, (s1,s2), directory)
+        train_series_class(size, (s1,s2), directory)
     elif GP == 'pipeline_test':
         print("cool")
     else:
-        create_training_data(size, sN, (t1,t2), (c1,c2), (s1,s2), instr.get('verbose'), directory)
+        create_training_data(size, (t1,t2), (c1,c2), (s1,s2), v=instr.get('verbose')) #, directory)

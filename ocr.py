@@ -5,6 +5,7 @@ import datetime
 import pytesseract
 import re
 from pytesseract import Output
+from tensorflow.core.protobuf.struct_pb2 import NoneValue
 from seg_img import segmentImg
 from PIL import Image
 from object_prediction import *
@@ -13,7 +14,7 @@ import re
 
 class OCR():
 
-    def __init__(self, image, segImg, box_dict, k): # , rotation=):
+    def __init__(self, image, box_dict, k=None): # , rotation=):
         self.img = cv2.imread(image)
         #self.img = self.img*0.5
         self.img = cv2.resize(self.img, (0,0), fx=3, fy=3)
@@ -107,6 +108,7 @@ class OCR():
     def dist(self,p1,p2):
         return math.sqrt(((p1[0]-p2[0])**2) + ((p1[1]-p2[1])**2))
 
+    # algorithmic label assignment
     def get_boxes(self):
         print(self.dimensions)
         #xMin, yMax = self.dimensions[1], 0

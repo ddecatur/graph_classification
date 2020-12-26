@@ -1,9 +1,9 @@
-size: 50
-graphType: 'random,random'
+size: 100 #160
+graphType: 'random,random' # if you want a specific graph type such as line or scatter or if you just want random types
 color: 'multi,multi'  # multi for multi-colored, anything else for single color
 dataStyle: 'multi,multi'  # same issue here that multi had, fix later
 verbose: False
-learnNum: 1
-seg: True
+learnNum: 1 # how many models you want to train
+#seg: True
 genPurpose: 'corr_train' # whether or not you want to train the series classifier or the graph classifier
-seriesNum: multi # whether or not you want the option of multi series graphs
+#seriesNum: multi # whether or not you want the option of multi series graphs

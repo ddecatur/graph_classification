@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 import csv
 from datetime import datetime
 
-def graph_classification (path_to_data, n):
+def graph_classification (path_to_data, n, dataDir="graphs_filtered"):
     cwd=os.getcwd()
     if(cwd!=path_to_data):
         print("graph_classification called from wrong directory")
     else:
         # set necessary directories
-        PATH = os.path.join(path_to_data, 'graphs_filtered')
+        PATH = os.path.join(path_to_data, dataDir)
         train_dir = os.path.join(PATH, 'train')
         validation_dir = os.path.join(PATH, 'validation')
         train_pos_dir = os.path.join(train_dir, 'positive')  # directory with our training positive pictures
@@ -37,6 +37,7 @@ def graph_classification (path_to_data, n):
 
         # set constants
         batch_size = 128
+        val_batch_size = batch_size//4
         epochs = 15
         IMG_HEIGHT = 150
         IMG_WIDTH = 150
@@ -79,6 +80,10 @@ def graph_classification (path_to_data, n):
         # Model Summary
         model.summary()
 
+        # print(total_train // batch_size)
+        # print(total_val // batch_size)
+        # print(total_val // val_batch_size)
+
         # train model
         history = model.fit_generator(
             train_data_gen,
@@ -86,10 +91,12 @@ def graph_classification (path_to_data, n):
             epochs=epochs,
             validation_data=val_data_gen,
             validation_steps=total_val // batch_size
+            #validation_steps=total_val // 16
         )
 
         # visualize training
         # ------------------
+        #print(history.history)
         acc = history.history['accuracy']
         val_acc = history.history['val_accuracy']
 
@@ -98,6 +105,7 @@ def graph_classification (path_to_data, n):
 
         epochs_range = range(epochs)
 
+        plt.style.use('default')
         plt.figure(figsize=(8, 8))
         plt.subplot(1, 2, 1)
         plt.plot(epochs_range, acc, label='Training Accuracy')

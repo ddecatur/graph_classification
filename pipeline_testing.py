@@ -217,4 +217,4 @@ def test_outside_data():
     print('Total Score: ' + str((mScore+rScore)/2))
     print('Total Adjusted: ' + str((mAScore+rAScore)/2))
 
-test_outside_data()
+#test_outside_data()

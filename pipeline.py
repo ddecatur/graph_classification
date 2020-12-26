@@ -210,10 +210,10 @@ def run(img):
     col_to_seg_map = {}
     segImg = segmentImg(img)
     segLeg = None
-    #jpgimg = Image.open(img).convert('RGB')
-    #newimgp = img[:len(img)-3] + 'jpg' # convert png to jpg
-    #jpgimg.save(newimgp)
-    ocr = OCR(img,segImg,{},4)#assign_labels(show_inference(detection_model, newimgp)))
+    jpgimg = Image.open(img).convert('RGB')
+    newimgp = img[:len(img)-3] + 'jpg' # convert png to jpg
+    jpgimg.save(newimgp)
+    ocr = OCR(img,assign_labels(show_inference(detection_model, newimgp))) #{},4)#
     #text_dict = ocr.crop()
     #print(ocr.match_leg_img)
     #if ocr.match_leg_img:
@@ -230,7 +230,7 @@ def run(img):
     for i,(res,col) in enumerate(segImg):
         fname = "pipeline_batch/" + str(i) + ".png"
         plt.imsave(fname, res)
-        cat = predictCategory(fname, "models/correlation/graph_class_model.h5", ['negative', 'neutral', 'positive']) #"models/correlation/graph_class_model_v3.h5"
+        cat = predictCategory(fname, "models/correlation/graph_class_model_v3.h5", ['negative', 'neutral', 'positive']) #"models/correlation/graph_class_model_v3.h5"
         # variable = pytesseract.image_to_string(Image.open(fname))
         colstr = "["
         for chanel in col:
@@ -310,7 +310,7 @@ def run(img):
 
 def process_img(img_path):
     result,OCR = run(img_path)
-    text_dict = {'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
+    text_dict = OCR.crop()#{'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
     display_string = img_path
     for elem in text_dict:
         if elem != 'legend' and text_dict[elem] is not None:
@@ -325,6 +325,6 @@ def process_img(img_path):
     
     return (display_string, corr_set)
 
-strrrr, setttt = process_img('./exp_testing/R/R16.png')
-print(strrrr)
-print(setttt)
+# strrrr, setttt = process_img('./exp9_ctrl/graph_0.png')
+# print(strrrr)
+# print(setttt)

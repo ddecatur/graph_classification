@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import warnings
 from predict import predictCategory
 from kneed import KneeLocator
 
@@ -104,20 +105,27 @@ def num_diff_cols(img):
   return numCols
 
 
-def elbowM(arr):
-  arr = arr.reshape((arr.shape[0] * arr.shape[1], 3))
-  maxk = 8
-  y = []
-  for i in range(1,maxk+1):
-    kmeans = KMeans(n_clusters=i)
-    kmeans.fit(arr)
-    y.append(kmeans.inertia_)
-  x = range(1, len(y)+1)
-  kn = KneeLocator(x, y, S=3.0, online=True, curve='convex', direction='decreasing')
-  if kn.y_normalized[kn.knee-1] < 0.985:#used to be 99
-    return kn.knee+1
-  else:
-    return kn.knee
+def elbowM(arr, kneedleBasic=False):
+  with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    arr = arr.reshape((arr.shape[0] * arr.shape[1], 3))
+    maxk = 8
+    y = []
+    for i in range(1,maxk+1):
+      kmeans = KMeans(n_clusters=i)
+      kmeans.fit(arr)
+      y.append(kmeans.inertia_)
+    x = range(1, len(y)+1)
+    kn = KneeLocator(x, y, S=3.0, online=True, curve='convex', direction='decreasing')
+    
+    # for basic kneedle usage
+    if kneedleBasic:
+      return kn.knee
+    
+    if kn.y_normalized[kn.knee-1] < 0.985:#used to be 99
+      return kn.knee+1
+    else:
+      return kn.knee
   
 
 

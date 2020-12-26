@@ -15,7 +15,7 @@ def clean(directory):
             print("Error while deleting graph_info.csv. Likely the file does not exist")
 
         # remove generated graphs
-        fileList = glob.glob("./graphs_filtered/*/*/*graph*.png") # switched to jpg
+        fileList = glob.glob("./graphs_filtered/*/*/*.png") # switched to jpg also removed 'graph' text matching requirement
         for filePath in fileList:
             try:
                 os.remove(filePath)
