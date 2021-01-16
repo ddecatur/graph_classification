@@ -212,15 +212,16 @@ def create_multiData(n, sN, train_val, seriesType, dcolor, dataStyle, model, pst
         im = Image.fromarray(img)
         im.save(fname)
         plt.close()
-    # elif model == 'exp1':
-    #     fname = 'exp1/'+ str(sN) + '/' + str(sN) + "_graph" + str(n) + ".png"
-    #     fig.savefig(fname)
-    #     if preprocess == True:
-    #         img = cv2.imread(fname)
-    #         img = sat_thresh_filter(img,30)
-    #         im = Image.fromarray(img)
-    #         im.save(fname)
-    #     plt.close()
+    elif model == 'exp10':
+        fname = "placeholder.png"
+        fig.savefig(fname)
+        fname = outputDir2 + '/' + str(sN) + "_graph" + str(n) + ".png"
+        segImg = segmentImg(fname)
+        for i,(img,col) in enumerate(segImg):
+            closeCol = find_nearest_col(col,posRGB)
+            if closeCol in correlation:
+                corrstr = correlation[closeCol]
+        plt.close()
 
     else:
         # name the given graph

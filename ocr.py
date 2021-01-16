@@ -102,7 +102,6 @@ class OCR():
 
             # if self.box_dict[box] == 'legend':
             #     for token in st.split():
-                    
         return text_dict
 
     def dist(self,p1,p2):

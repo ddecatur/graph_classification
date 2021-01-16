@@ -40,7 +40,7 @@ def permutation(lst):
            l.append([m] + p) 
     return l
 
-def match_series(col_to_seg_map,offset,leg_text_boxes,img_shape):
+def match_series(col_to_seg_map,offset,leg_text_boxes,img_shape, algo='current'):
     '''
     returns a dictionary associating colors to series text
     '''
@@ -49,6 +49,7 @@ def match_series(col_to_seg_map,offset,leg_text_boxes,img_shape):
     print('leg_text_boxes: ')
     print(leg_text_boxes)
     rtn = {}
+    rtn2 = {}
     specialph = []
     matching = {}
     dist_list = []
@@ -193,11 +194,20 @@ def match_series(col_to_seg_map,offset,leg_text_boxes,img_shape):
     #else:
         #rtn[final_perm[i]] = "unknown text"
 
+    if algo == 'old':
+        for dist_elem in dist_list:
+            (text, color) = matching[dist_elem]
+            if text not in seen_already and color not in seen_already:
+                seen_already.append(text)
+                seen_already.append(color)
+                rtn2[color] = text
+        return (rtn,rtn2)
     print(rtn)
+    print(algo)
     return rtn
 
 
-def run(img):
+def run(img, algo='current'):
     
     #create new dir
     path = "./pipeline_batch"
@@ -206,6 +216,7 @@ def run(img):
     except OSError:
         print ("Warning: Creation of the directory %s failed, might already exist" % path)
     rtn = {}
+    rtn2 = {}
     col_to_cat_map = {}
     col_to_seg_map = {}
     segImg = segmentImg(img)
@@ -214,7 +225,8 @@ def run(img):
     newimgp = img[:len(img)-3] + 'jpg' # convert png to jpg
     jpgimg.save(newimgp)
     ocr = OCR(img,assign_labels(show_inference(detection_model, newimgp))) #{},4)#
-    #text_dict = ocr.crop()
+    #print('legbox = ',ocr.leg_box)
+    text_dict = ocr.crop()
     #print(ocr.match_leg_img)
     #if ocr.match_leg_img:
         #print('yes')
@@ -265,9 +277,16 @@ def run(img):
             col_to_cat_map[col] = set()
         col_to_cat_map[col].add(cat)
     if ocr.leg_box != None:
-        col_to_series_map = match_series(col_to_seg_map, ocr.crop_amount, ocr.leg_text_boxes, img_shape)
-        for key in col_to_series_map:
-            rtn[col_to_series_map[key]] = col_to_cat_map[key]
+        if algo == 'old':
+            col_to_series_map, col_to_series_map2 = match_series(col_to_seg_map, ocr.crop_amount, ocr.leg_text_boxes, img_shape, algo=algo)
+            for key in col_to_series_map:
+                rtn[col_to_series_map[key]] = col_to_cat_map[key]
+            for key in col_to_series_map2:
+                rtn2[col_to_series_map2[key]] = col_to_cat_map[key]
+        else:
+            col_to_series_map = match_series(col_to_seg_map, ocr.crop_amount, ocr.leg_text_boxes, img_shape, algo=algo)
+            for key in col_to_series_map:
+                rtn[col_to_series_map[key]] = col_to_cat_map[key]
     else:
         rtn = col_to_cat_map
 
@@ -305,25 +324,51 @@ def run(img):
     # color_list.sort(reverse=True)
     # print(color_list)
     #print(col_to_cat_map)
-    return (rtn,ocr)
+    if algo == 'old':
+        return (rtn,rtn2,text_dict,ocr)
+    else:
+        return (rtn,text_dict,ocr)
 
 
-def process_img(img_path):
-    result,OCR = run(img_path)
-    text_dict = OCR.crop()#{'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
-    display_string = img_path
-    for elem in text_dict:
-        if elem != 'legend' and text_dict[elem] is not None:
-            display_string = display_string + ", " + elem + ": " + text_dict[elem]
-            # for obj in text_dict[elem]:
-            #     display_string = display_string + " " + obj #removed space
-    corr_set = set()
-    for series in result:
-        for elem in result[series]:
-            corr_set.add(series + ": " + elem)
-            display_string = display_string + ", " + series + ": " + elem
-    
-    return (display_string, corr_set)
+def process_img(img_path, algo='current'):
+    if algo=='old':
+        result,result2,text_dict,OCR = run(img_path, algo=algo)
+        text_dict = OCR.crop()#{'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
+        display_string = img_path
+        for elem in text_dict:
+            if elem != 'legend' and text_dict[elem] is not None:
+                #print(display_string, elem, text_dict[elem])
+                display_string = display_string + ", " + elem + ": " + ' '.join(text_dict[elem]) #use this if not OD --> text_dict[elem]
+                # for obj in text_dict[elem]:
+                #     display_string = display_string + " " + obj #removed space
+        corr_set = set()
+        corr_set2 = set()
+        for series in result:
+            for elem in result[series]:
+                corr_set.add(series + ": " + elem)
+                #display_string = display_string + ", " + series + ": " + elem
+        for series in result2:
+            for elem in result2[series]:
+                corr_set2.add(series + ": " + elem)
+        
+        return (display_string, corr_set, corr_set2)
+    else:
+        result,text_dict,OCR = run(img_path, algo=algo) #OCR
+        text_dict = OCR.crop()#{'x axis': OCR.xAxisLab, 'y axis': OCR.yAxisLab, 'title': OCR.title}
+        display_string = img_path
+        for elem in text_dict:
+            if elem != 'legend' and text_dict[elem] is not None:
+                #print(display_string, elem, text_dict[elem])
+                display_string = display_string + ", " + elem + ": " + ' '.join(text_dict[elem]) #use this if not OD --> text_dict[elem]
+                # for obj in text_dict[elem]:
+                #     display_string = display_string + " " + obj #removed space
+        corr_set = set()
+        for series in result:
+            for elem in result[series]:
+                corr_set.add(series + ": " + elem)
+                #display_string = display_string + ", " + series + ": " + elem
+        
+        return (display_string, corr_set)
 
 # strrrr, setttt = process_img('./exp9_ctrl/graph_0.png')
 # print(strrrr)

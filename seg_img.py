@@ -172,7 +172,7 @@ def isGrayish(color):
         return False
 
 # type: img path --> list of color ranges
-def idColor(image):
+def idColor(image, preprocess=True):
     rangeList = list()
     
     ogImg = image
@@ -182,7 +182,8 @@ def idColor(image):
     #image = median_blur(image)
     #image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     #image = descritize(image)
-    image = sat_thresh_filter(image,40)
+    if preprocess:
+        image = sat_thresh_filter(image,40)
     #image = orange_to_red(image)
 
     clt = KMeansCluster(image,ogImg)#,setK)
@@ -273,7 +274,7 @@ def hsvRange (rgbList):
     return rangeList
 
 
-def segmentImg(img, fixed_k=None):
+def segmentImg(img, fixed_k=None, preprocess=True):
     '''
     Givn an image path, segment out colors from that image
     '''
@@ -285,12 +286,13 @@ def segmentImg(img, fixed_k=None):
     #graph = median_blur(graph)
     #graph = cv2.cvtColor(graph, cv2.COLOR_BGR2HSV)
     #graph = descritize(graph)
-    graph = sat_thresh_filter(graph,40)
+    if preprocess:
+        graph = sat_thresh_filter(graph,40)
     #graph = orange_to_red(graph)
     #graph = cv2.cvtColor(graph, cv2.COLOR_BGR2RGB) # convert color from BGR to RGB
     #graph = cv2.cvtColor(graph, cv2.COLOR_HSV2RGB)
     
-    colList = idColor(img)
+    colList = idColor(img, preprocess=preprocess)
     colRangeList = hsvRange(colList)
 
     # convert to hsv image type
